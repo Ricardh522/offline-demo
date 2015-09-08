@@ -1,5 +1,6 @@
 app/javascript/3.14/
 dist/javascript/3.14/
+dist/images/
 node_modules/
 web.config
 Demo-Grafton.sublime-project
