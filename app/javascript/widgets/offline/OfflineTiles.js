@@ -1,5 +1,5 @@
 define(["dojo/_base/declare", "dojo/parser", "dojo/ready",  "dojo/on", 
-    "dijit/_WidgetBase", "javascript/utils/offline-tiles-advanced-src.js"], function (declare, parser, ready, on,  _WidgetBase) {
+    "dijit/_WidgetBase", "javascript/utils/offline-tiles-advanced-min.js"], function (declare, parser, ready, on,  _WidgetBase) {
 
 
      return declare("OfflineTiles", [_WidgetBase], {   

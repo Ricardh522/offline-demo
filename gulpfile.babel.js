@@ -38,7 +38,7 @@ const reload = browserSync.reload;
 
 // Lint JavaScript
 gulp.task('jshint', () =>
-  gulp.src('app/javascript/widgets/*.js')
+  gulp.src('app/javascript/widgets/offline/*.js', 'app/javascript/widgets/*.js')
     .pipe(reload({stream: true, once: true}))
     .pipe($.jshint())
     .pipe($.jshint.reporter('jshint-stylish'))
@@ -122,8 +122,8 @@ gulp.task('scripts', () =>
     // Note: Since we are not using useref in the scripts build pipeline,
     //       you need to explicitly list your scripts here in the right order
     //       to be correctly concatenated
-    './app/javascript/widgets/OfflineWidget.js', './app/javascript/widgets/OfflineMap.js',
-    './app/javascript/widgets/OflineTiles.js'
+    './app/javascript/widgets/OfflineWidget.js', './app/javascript/widgets/offline/OfflineMap.js',
+    './app/javascript/widgets/offline/OflineTiles.js'
     // Other scripts
   ])
     // .pipe($.concat('offlineWidget.js'))
@@ -184,7 +184,7 @@ gulp.task('serve', ['styles'], () => {
 
   gulp.watch(['app/index.html'], reload);
   gulp.watch(['app/css/*.{scss,css}'], ['styles', reload]);
-  gulp.watch(['app/javascript/widgets/*.js'], ['jshint']);
+  gulp.watch(['app/javascript/widgets/*'], ['jshint']);
   gulp.watch(['app/images/**/*'], reload);
 });
 
