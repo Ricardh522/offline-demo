@@ -1,0 +1,321 @@
+#splashPage {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    bottom: 0px;
+    right: 0px;
+    background-color: rgb(255,255,255);
+    z-index: 100;
+    opacity: 1;
+    visibility: visible;
+    transition-property: opacity, visibility;
+    transition-delay: 3s;
+    transition-duration: 3s;
+    display: flex;
+    justify-content: center;
+    align-content: center;
+}
+
+body {
+        position: absolute;
+        overflow: hidden;
+        height: 100%;
+        width: 100%;
+}
+
+#loadingImg {
+    position: fixed;
+    right: 50%;
+    top: 50%;
+    z-index:100;
+    background-color: rgba(255,255,255,0)
+}
+
+.flex-container {
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+}
+
+#messages p {
+    color: #fff;
+    font-size: 15px;
+    font-family: sans-serif;
+    display: inline-block;
+    float: left
+}
+
+#logo {
+    max-height: 20%;
+    max-width: 55%;
+    display: inline-block;
+}
+
+
+#progress {
+    horizontal-align: center
+}
+
+#buttons {
+    z-index: 80;
+    background-color: rgba(255,255,255,1);
+    border-bottom: 1px solid gray;
+    position: absolute;
+    top:0px;
+    left:0px;
+    right:0px;
+}
+
+#esriButtons {
+    position: relative;
+    left: 50px;
+    opacity: 1.0;
+}
+
+#offlineButtons button {
+    opacity: 1.0;
+    right: 50px;
+}
+
+.container-fluid {
+    opacity: 0;
+    visibility: hidden;
+    transition-property: opacity, visibility;
+    transition-delay: 0;
+    transition-duration: 6s;
+    overflow: hidden;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    z-index: 0;
+
+}
+
+
+.hidden-xs {
+    display: none
+}
+
+
+#mapDiv {
+    z-index: 0;
+    height: 100%;
+    height: 100%;
+    min-height: 895px;
+}
+
+#leftPanel {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    bottom: 0px;
+    width: 20px;
+    background-color: rgb(255,255,255);
+    z-index: 100;
+}
+
+#rightPanel {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    width: 20px;
+    background-color: rgb(255,255,255);
+    z-index: 100;
+}
+
+#scalebarHousing {
+    width: 100%;
+    height: 40px;
+    padding-top: 5px;
+    opacity: 1;
+    padding-bottom: 2px;
+    display:  block;
+    background-color: rgba(255,255,255,1);
+    z-index: 80;
+    position: absolute;
+    bottom: 0px;
+    border-top: 1px solid gray;
+}
+
+.esriScalebar {
+    left: 25px;
+}
+
+#infoPanel {
+    position: relative;
+    float: right;
+    width: 20px;
+    z-index:50;
+    max-height: 95%;
+    overflow-y: scroll;
+}
+
+#panels{
+    z-index: 50;
+    position: relative;
+    background-color: white;
+    display: inline-block;
+}
+
+#layerListHousing, #legendHousing {
+    position: relative;
+    float: right;
+    display: inline-block;
+    z-index: 50;
+    border-bottom: 1px solid gray;
+    background-color: white;
+}
+
+#legendDiv {
+
+}
+
+ .esriLegendService{
+
+ }
+
+ .esriLegendServiceLabel {
+
+ }
+
+.esriLegendLayerLabel{
+
+}
+
+.esriLegendLayer{
+
+}
+
+
+.touch-moveable {
+    -webkit-overflow-scrolling: touch;
+}
+
+body {
+    background-color: rgb(255,255,255);
+    font-family: "Trebuchet MS"
+}
+
+.text-center {
+    color: #fff
+}
+
+#homeButton,
+#esriLocate {
+    display: inline-block;
+}
+
+#navbar {
+    position: relative;
+    width: 100%;
+    padding: 2px;
+}
+
+#buttons {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    width: 100%;
+}
+
+#buttons div {
+    margin: 2px;
+}
+
+#esriButtons {
+    display: flex;
+    flex-direction: row;
+}
+
+#offlineButtons {
+    display: flex;
+    position: relative;
+    justify-content: space-between;
+    width: 140px;
+}
+
+paper-fab:active {
+    -webkit-transform: scale(1.1, 1.1);
+    transform: scale(1.1, 1.1)
+}
+
+button:focus,
+input:focus {
+    outline: 0!important
+}
+
+.span-pending {
+    visibility: hidden;
+    transition-property: visibility
+}
+
+@-webkit-keyframes pulse {
+    0% {
+        opacity: 1
+    }
+    45% {
+        opacity: .2
+    }
+    100% {
+        opacity: 1
+    }
+}
+
+#map_graphics_layer {
+    -webkit-animation-duration: 3s;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-name: pulse;
+    -moz-animation-duration: 3s;
+    -moz-animation-iteration-count: infinite;
+    -moz-animation-name: pulse
+}
+
+.line {
+    margin-bottom: 5px
+}
+
+.line span {
+    margin-left: 5px
+}
+
+/*** Restyle Esri Popup ***/
+.esriPopupWrapper {
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 18px;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #333333;
+}
+
+/* Easy color control */
+.esriPopupWrapper {
+  background-color: #fff;
+}
+
+.esriPopup .titlePane, .esriPopup .contentPane, .esriPopup .actionsPane, 
+.esriPopup .pointer, .esriPopup .outerPointer, .esriPopup .pointer.top, .esriPopup .pointer.topLeft, 
+.esriPopup .pointer.topRight, .esriPopup .pointer.bottomLeft, .esriPopup .pointer.bottomRight {
+  background-color: #fff;
+}
+
+/* Soften corners */
+.esriPopup.light .esriPopupWrapper, .esriPopup.dark .esriPopupWrapper {
+  border-radius: 1em;
+  -webkit-border-radius: 1em;
+}
+
+.esriPopup.light .titlePane, .esriPopup.dark .titlePane {
+  border-radius: 0.3em 0.3em 0 0;
+  -webkit-border-radius: 0.3em 0.3em 0 0;
+}
+.esriPopup.light .actionsPane, .esriPopup.dark .actionsPane {
+  border-radius: 0px 0px 0.3em 0.3em;
+  -webkit-border-radius: 0px 0px 0.3em 0.3em;
+}
+
