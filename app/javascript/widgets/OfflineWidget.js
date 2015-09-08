@@ -1,9 +1,8 @@
-define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready",
-  "dojo/dom", "dojo/dom-class", "dojo/on", "dojo/Deferred", "dojo/promise/all",
+define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "dojo/dom-style", 
+  "dojo/dom", "dojo/dom-class", "dojo/on",  "dojo/mouse", "dojo/Deferred", "dojo/dom-attr", "dojo/promise/all",
    "utils/debouncer", "esri/geometry/webMercatorUtils", "esri/tasks/Geoprocessor",
     "dijit/_WidgetBase", "esri/tasks/IdentifyTask", "esri/tasks/IdentifyParameters",
-     "esri/tasks/IdentifyResult","widgets/offline/OfflineMap",
-      "widgets/offline/OfflineTiles", "esri/tasks/FeatureSet",
+     "esri/tasks/IdentifyResult","esri/tasks/FeatureSet",
       "esri/layers/ArcGISDynamicMapServiceLayer",
        "esri/layers/ImageParameters", "esri/geometry/Extent",
         "esri/dijit/PopupTemplate", "esri/layers/FeatureLayer", "esri/arcgis/utils",
@@ -12,15 +11,15 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready",
   "esri/geometry/Polygon", "esri/layers/LabelLayer",
    "esri/renderers/SimpleRenderer", "esri/symbols/TextSymbol", "esri/request",
      "dojo/dom-construct", "esri/symbols/SimpleFillSymbol",
-     "esri/symbols/SimpleLineSymbol", "esri/Color", "esri/dijit/LayerList"],
-  function (declare, arrayUtils, parser, ready, dom, domClass, on, Deferred, all,
+     "esri/symbols/SimpleLineSymbol", "esri/Color", "esri/dijit/util/busyIndicator", "esri/dijit/LayerList",
+      "javascript/utils/offline-tiles-advanced-min.js"],
+  function (declare, arrayUtils, parser, ready, domStyle, dom, domClass, on, mouse, Deferred, domAttr, all,
    debouncer, webMercatorUtils, Geoprocessor, _WidgetBase, IdentifyTask,
-  IdentifyParameters, IdentifyResult, OfflineMap, OfflineTiles,
-   FeatureSet, ArcGISDynamicMapServiceLayer, ImageParameters,  Extent,
-    PopupTemplate, FeatureLayer, arcgisUtils, graphicsUtils, geometryEngine,
+  IdentifyParameters, IdentifyResult, FeatureSet, ArcGISDynamicMapServiceLayer,
+   ImageParameters,  Extent, PopupTemplate, FeatureLayer, arcgisUtils, graphicsUtils, geometryEngine,
     Query, QueryTask, Point, Polygon, LabelLayer, SimpleRenderer, TextSymbol,
      esriRequest, domConstruct, SimpleFillSymbol, SimpleLineSymbol,
-    Color, LayerList) { 
+    Color, busyIndicator, LayerList) { 
 
      return declare("OfflineWidget", [_WidgetBase], {   
 
@@ -224,8 +223,163 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready",
 
             initModules: function(params, callback){
                     (function() {
-                    offlineWidget.offlineMap = new OfflineMap();
-                    offlineWidget.offlineTiles = new OfflineTiles();
+                    offlineWidget.offlineMap = {
+                         startup: function() {
+                               console.log("OfflineMapStartup Function fired");
+                                var img = dom.byId('loadingImg');
+                                var map = offlineWidget.map;
+                                var handle = busyIndicator.create({
+                                        backgroundOpacity: 0.01,
+                                        target: img,
+                                        imageUrl: "images/loading-throb.gif",
+                                        zIndex: 100
+                                    });
+                                handle.hide();
+                                this.handle = handle;
+                                domStyle.set(img, 'visibility', "hidden");
+                            },
+
+                            showLoading: function() {
+                                var img = dom.byId('loadingImg');
+                                var map = offlineWidget.map;
+                                this.handle.show();
+                                map.disableMapNavigation();
+                                map.disablePan();
+                              },
+
+                              hideLoading: function() {
+                                var img = dom.byId('loadingImg');
+                                var map = offlineWidget.map;
+                                this.handle.hide();
+                                map.enableMapNavigation();
+                                map.enablePan();
+                              },
+
+                             initEvents: function() {
+                            
+                                    var map = offlineWidget.map;
+                                    map.on("zoom-end",function(evt) {
+                                        _currentExtent = evt.extent;
+                                        offlineWidget.updateLocalStorage();
+                                        Offline.check();
+                                    });
+
+                                    map.on("pan-end",function(evt) {
+                                        _currentExtent = evt.extent;
+                                        offlineWidget.updateLocalStorage();
+                                        Offline.check();
+                                    });
+
+
+                                    map.on("pan", function(evt) {
+                                        var that = offlineWidget.offlineMap;
+                                        that.hideLoading();
+                                    });
+
+                                    map.on("zoom-start", function(evt) {
+                                        var that = offlineWidget.offlineMap;
+                                        that.showLoading();
+                                    });
+
+                                    map.on("zoom-end", function(evt) {
+                                        var that = offlineWidget.offlineMap;
+                                        that.hideLoading();
+                                    });
+
+                                    debouncer.setOrientationListener(250,function(){
+                                        console.log("orientation"); orientationChange = true;
+                                    });
+
+
+                                    document.addEventListener('touchmove', function(event) {
+                                      if (!$(event.target).parents().hasClass("touch-moveable"))
+                                          {
+                                            event.preventDefault();
+                                            event.stopPropagation();
+                                        }
+                                    } , false); 
+                                }
+                    };
+
+                    offlineWidget.offlineTiles = {
+                         startup: function() {
+                                if (Offline.state === 'up') {
+                                    _isOnline = true;
+                                }
+                                
+                                var tileLayer = new O.esri.Tiles.OfflineTileEnablerLayer(
+                                    // "http://52.0.46.248:6080/arcgis/rest/services/RSW/RSW_Airfield_TS/MapServer",
+                                    "http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
+
+                                    function (evt) {
+                                        console.log("Offline tile lib enabled. App is: " + Offline.state);
+                                    },_isOnline);
+                          
+                                tileLayer._minZoom = 14;
+                                tileLayer._maxZoom = 19;
+                                this.tileLayer = tileLayer;
+                            },
+
+                            // Set up min and max boundaries for retrieving tiles
+                            minZoomAdjust: -1,
+                            maxZoomAdjust: 4,
+                            resetZoom: 15,
+                            _currentZoom: null,
+                            // Important settings for determining which tile layers gets stored for offline use.
+                            EXTENT_BUFFER: 0, //buffers the map extent in meters
+                            _currentExtent: null,
+                            // For cancelling the download of tiles
+                            _wantToCancel: false,
+                            _downloadState: "downloaded",
+                            
+                            initOffline: function()
+                            {
+                                console.log("extending");  
+                                Offline.on('up', this.goOnline );
+                                Offline.on('down', this.goOffline );
+                            },
+
+                            updateTileCountEstimation: function()
+                            {
+                                console.log('updating');
+                                var tileLayer = this.tileLayer;
+                                var map = offlineWidget.map;
+                                var totalEstimation = { tileCount:0, sizeBytes:0 };
+                                var minLevel = 14;
+                                var maxLevel = 19;
+                                this.tileLayer.estimateTileSize(function(tileSize)
+                                {
+                                    var totalMem = [];
+                                    for(var level=minLevel; level<=maxLevel; level++)
+                                    {
+                                        var levelEstimation = tileLayer.getLevelEstimation(map.extent,level,tileSize);
+
+                                        totalEstimation.tileCount += levelEstimation.tileCount;
+                                        totalEstimation.sizeBytes += levelEstimation.sizeBytes;
+
+                                        if( levelEstimation.tileCount > 0)
+                                        {
+                                           
+                                            console.log(rowContent);
+                                            totalMem.push(newstring);
+                                        }
+
+                                        if( totalEstimation.tileCount > 5000 )
+                                        {
+                                          break;
+                                        }
+                                    }
+                                 
+                                });
+                            },
+
+                           
+                            cancel: function()
+                            {
+                                cancelRequested = true;
+                            }
+                    };
+
                     offlineWidget.offlineMap.startup();
                     offlineWidget.offlineTiles.startup();
 

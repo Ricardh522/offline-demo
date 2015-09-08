@@ -54,8 +54,6 @@ javascript/utils/debouncer.js
 javascript/jquery-1.11.1.js
 javascript/IndexedDBShim.js
 javascript/offline.min.js
-javascript/widgets/offline/OfflineMap.js
-javascript/widgets/offline/OfflineTiles.js
 javascript/widgets/OfflineWidget.js
 javascript/3.14/esri/Color.js
 javascript/3.14/esri/graphic.js

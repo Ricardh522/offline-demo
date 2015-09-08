@@ -38,7 +38,7 @@ const reload = browserSync.reload;
 
 // Lint JavaScript
 gulp.task('jshint', () =>
-  gulp.src('app/javascript/widgets/offline/*.js', 'app/javascript/widgets/*.js')
+  gulp.src('app/javascript/widgets/OfflineWidget.js')
     .pipe(reload({stream: true, once: true}))
     .pipe($.jshint())
     .pipe($.jshint.reporter('jshint-stylish'))
@@ -47,7 +47,7 @@ gulp.task('jshint', () =>
 
 // Optimize images
 gulp.task('images', () =>
-  gulp.src('app/images/**')
+  gulp.src('app/images/*')
     .pipe($.cache($.imagemin({
       progressive: true,
       interlaced: true
@@ -65,6 +65,15 @@ gulp.task('copyroot', () =>
   }).pipe(gulp.dest('dist/javascript'))
     .pipe($.size({title: 'copyroot'}))
 );
+
+gulp.task('copyManifest', () =>
+  gulp.src([
+       'app/appcache.manifest', 'manifest.json'
+       ], {
+        dot: false
+      }).pipe(gulp.dest('dist'))
+        .pipe($.size({title: 'copyManifest'}))
+  );
 
 gulp.task('copyUtils', () =>
   gulp.src([
@@ -122,11 +131,11 @@ gulp.task('scripts', () =>
     // Note: Since we are not using useref in the scripts build pipeline,
     //       you need to explicitly list your scripts here in the right order
     //       to be correctly concatenated
-    './app/javascript/widgets/OfflineWidget.js', './app/javascript/widgets/offline/OfflineMap.js',
-    './app/javascript/widgets/offline/OflineTiles.js'
+    './app/javascript/widgets/OfflineWidget.js'
+   
     // Other scripts
   ])
-    // .pipe($.concat('offlineWidget.js'))
+    .pipe($.concat('OfflineWidget.js'))
     .pipe($.uglify({preserveComments: 'some'}))
     // Output files
     .pipe(gulp.dest('dist/javascript/widgets'))
@@ -206,7 +215,7 @@ gulp.task('serve:dist', ['default'], () =>
 gulp.task('default', ['clean'], cb =>
   runSequence(
     'styles',
-    ['jshint', 'html', 'scripts', 'images', 'fonts', 'copyroot', 'copyUtils'],
+    ['jshint', 'html', 'scripts', 'images', 'fonts', 'copyroot', 'copyUtils', 'copyManifest'],
     'generate-service-worker',
     cb
   )
