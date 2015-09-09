@@ -85,6 +85,8 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                 this.onlineTest = params.onlineTest;
                 this.mapService = params.mapService;
                 this.map = params.map;
+                this.tileServiceUrl = params.tileServiceUrl;
+
                 offlineWidget.validate(function(e) {
                     console.log(e);
                 });
@@ -308,9 +310,7 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                                 }
                                 
                                 var tileLayer = new O.esri.Tiles.OfflineTileEnablerLayer(
-                                    // "http://52.0.46.248:6080/arcgis/rest/services/RSW/RSW_Airfield_TS/MapServer",
-                                    "http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
-
+                                    offlineWidget.tileServiceUrl,
                                     function (evt) {
                                         console.log("Offline tile lib enabled. App is: " + Offline.state);
                                     },_isOnline);

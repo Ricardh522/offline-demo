@@ -21,6 +21,8 @@ body {
         overflow: hidden;
         height: 100%;
         width: 100%;
+        margin: 0;
+        font-family:"Trebuchet MS";
 }
 
 #loadingImg {
@@ -142,6 +144,15 @@ body {
 
 .esriScalebar {
     left: 25px;
+}
+
+#measureHousing{
+    right: 20px;
+    diplay: inline-block;
+    bottom: 5px;
+    position: absolute;
+    max-width: 25%;
+    min-width: 200px;
 }
 
 #infoPanel {
@@ -319,3 +330,21 @@ input:focus {
   -webkit-border-radius: 0px 0px 0.3em 0.3em;
 }
 
+.claro .dijitTitlePaneTitle {
+    background: #fff;
+    font-weight:600;
+    border: none;
+    border-bottom:solid 1px #29201A;
+    border-top:solid 1px #29201A;
+}
+.claro .dijitTitlePaneTitleHover {
+    background:#eee;
+}
+.claro .dijitTitlePaneTitleActive {
+    background:#808775;
+}
+.claro .dijitTitlePaneContentOuter {
+    border-right: none;
+    border-bottom: none;
+    border-left: none;
+}
