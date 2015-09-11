@@ -68,7 +68,7 @@ gulp.task('copyroot', () =>
 
 gulp.task('copyManifest', () =>
   gulp.src([
-       'app/appcache.manifest', 'manifest.json'
+       'app/appcache.manifest', 'app/manifest.json'
        ], {
         dot: false
       }).pipe(gulp.dest('dist'))
@@ -138,7 +138,7 @@ gulp.task('scripts', () =>
     .pipe($.concat('OfflineWidget.js'))
     .pipe($.uglify({preserveComments: 'some'}))
     // Output files
-    .pipe(gulp.dest('dist/javascript/widgets'))
+    .pipe(gulp.dest('dist/javascript'))
     .pipe($.size({title: 'scripts'}))
 );
 
@@ -193,7 +193,8 @@ gulp.task('serve', ['styles'], () => {
 
   gulp.watch(['app/index.html'], reload);
   gulp.watch(['app/css/*.{scss,css}'], ['styles', reload]);
-  gulp.watch(['app/javascript/widgets/*'], ['jshint']);
+  gulp.watch(['app/javascript/widgets/*'], ['jshint', reload]);
+  gulp.watch(['app/javascript/*'], ['jshint', reload]);
   gulp.watch(['app/images/**/*'], reload);
 });
 

@@ -21,6 +21,8 @@ body {
         overflow: hidden;
         height: 100%;
         width: 100%;
+        margin: 0;
+        font-family:"Trebuchet MS";
 }
 
 #loadingImg {
@@ -111,7 +113,7 @@ body {
     top: 0px;
     left: 0px;
     bottom: 0px;
-    width: 20px;
+    width: 15px;
     background-color: rgb(255,255,255);
     z-index: 100;
 }
@@ -121,11 +123,17 @@ body {
     top: 0px;
     right: 0px;
     bottom: 0px;
-    width: 20px;
+    width: 15px;
     background-color: rgb(255,255,255);
     z-index: 100;
 }
 
+#rightHandle {
+    position: fixed;
+    top: 50%;
+    bottom: 50%;
+
+}
 #scalebarHousing {
     width: 100%;
     height: 40px;
@@ -144,13 +152,22 @@ body {
     left: 25px;
 }
 
+#measureHousing{
+    right: 15px;
+    display: inline-block;
+    bottom: 5px;
+    position: absolute;
+    max-width: 25%;
+    min-width: 200px;
+}
+
 #infoPanel {
     position: relative;
     float: right;
-    width: 20px;
+    width: 15px;
     z-index:50;
-    max-height: 95%;
-    overflow-y: scroll;
+    height: 90%;
+    background-color: white;
 }
 
 #panels{
@@ -165,12 +182,17 @@ body {
     float: right;
     display: inline-block;
     z-index: 50;
-    border-bottom: 1px solid gray;
     background-color: white;
+    padding: 3px;
+}
+
+#layerListHousing {
+    border-bottom: 1px solid gray;
 }
 
 #legendDiv {
-
+    padding: 3px;
+    
 }
 
  .esriLegendService{
@@ -319,3 +341,21 @@ input:focus {
   -webkit-border-radius: 0px 0px 0.3em 0.3em;
 }
 
+.claro .dijitTitlePaneTitle {
+    background: #fff;
+    font-weight:600;
+    border: none;
+    border-bottom:solid 1px #29201A;
+    border-top:solid 1px #29201A;
+}
+.claro .dijitTitlePaneTitleHover {
+    background:#eee;
+}
+.claro .dijitTitlePaneTitleActive {
+    background:#808775;
+}
+.claro .dijitTitlePaneContentOuter {
+    border-right: none;
+    border-bottom: none;
+    border-left: none;
+}
