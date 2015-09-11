@@ -193,7 +193,8 @@ gulp.task('serve', ['styles'], () => {
 
   gulp.watch(['app/index.html'], reload);
   gulp.watch(['app/css/*.{scss,css}'], ['styles', reload]);
-  gulp.watch(['app/javascript/widgets/*'], ['jshint']);
+  gulp.watch(['app/javascript/widgets/*'], ['jshint', reload]);
+  gulp.watch(['app/javascript/*'], ['jshint', reload]);
   gulp.watch(['app/images/**/*'], reload);
 });
 

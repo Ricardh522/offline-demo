@@ -1,7 +1,7 @@
 require(["esri/config", "esri/urlUtils", "esri/tasks/query", "dojo/on", "dojo/parser", "dojo/mouse", "esri/renderers/SimpleRenderer", "esri/dijit/BasemapGallery",
      "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/Color", "esri/dijit/PopupTemplate",
      "dojo/_base/array", "dojo/dom", "dojo/query", "dojox/gesture/swipe", "esri/dijit/Measurement", "esri/dijit/LocateButton", "esri/layers/ArcGISDynamicMapServiceLayer",
-      "esri/layers/FeatureLayer", "esri/geometry/Point", "dojo/dom-style", "dojo/dom-attr",
+      "esri/layers/FeatureLayer", "esri/geometry/Point", "dojo/dom-style", "dojo/dom-attr", 
      "esri/graphic", "esri/layers/GraphicsLayer", "esri/symbols/PictureMarkerSymbol", "esri/dijit/HomeButton",
      "esri/dijit/Scalebar", "esri/layers/GeoRSSLayer", "esri/geometry/Extent", "esri/SpatialReference", "esri/layers/ImageParameters",
      "esri/arcgis/OAuthInfo", "esri/IdentityManager", "esri/dijit/Legend", "esri/dijit/Popup", "esri/dijit/PopupTemplate", "dojo/dom-construct",
@@ -9,7 +9,7 @@ require(["esri/config", "esri/urlUtils", "esri/tasks/query", "dojo/on", "dojo/pa
    "dojo/domReady!"],
 
     function (esriConfig, urlUtils, Query, on, parser, mouse, SimpleRenderer, BasemapGallery, SimpleMarkerSymbol, SimpleLineSymbol, Color, PopupTemplate,
-        arrayUtils, dom, query, swipe, Measurement, LocateButton, ArcGISDynamicMapServiceLayer, FeatureLayer, Point, domStyle, domAttr,
+        arrayUtils, dom, query, swipe, Measurement, LocateButton, ArcGISDynamicMapServiceLayer, FeatureLayer, Point, domStyle, domAttr, 
         Graphic, GraphicsLayer, PictureMarkerSymbol, HomeButton, Scalebar,
         GeoRSSLayer, Extent, SpatialReference, ImageParameters, OAuthInfo, esriId, Legend, Popup,  PopupTemplate, domConstruct, SimpleFillSymbol, LayerList,
          BootstrapMap, AppCacheManager, OfflineWidget) {
@@ -55,7 +55,7 @@ require(["esri/config", "esri/urlUtils", "esri/tasks/query", "dojo/on", "dojo/pa
             var mapName = "RSW/Utilities"
 
             var mapService = new ArcGISDynamicMapServiceLayer(serverUrl + '/' + mapName + '/MapServer');
-            var tileServiceUrl = "http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer";
+            var tileServiceUrl = "http://52.0.185.237/waadmin/rest/services/RSW/WGS84Airfield/MapServer";
             var storedExtent = localStorage.offlineExtent;
             var mapExtent;
             var centerPnt;
@@ -64,10 +64,10 @@ require(["esri/config", "esri/urlUtils", "esri/tasks/query", "dojo/on", "dojo/pa
                 centerPnt = mapExtent.getCenter();
               } else {
                  mapExtent = new Extent({
-                    xmin: -9105585.479957854,
-                    ymin: 3063296.997828134,
-                    xmax: -9096556.355991429,
-                    ymax: 3067821.114439882,
+                    xmin: -9103233.409475232,
+                    ymin: 3063243.168823139,
+                    xmax: -9098484.759092892,
+                    ymax: 3067518.8650929537,
                     spatialReference: {
                         wkid: 102100
                     }
@@ -206,10 +206,14 @@ require(["esri/config", "esri/urlUtils", "esri/tasks/query", "dojo/on", "dojo/pa
                 evt.preventDefault();
                 evt.stopPropagation();
                 domStyle.set(infoPanel, {
-                    width: "250px"
+                    width: "250px",
+                    overflowY: "scroll"
                 });
                 domStyle.set(panels, {
                     opacity: 1
+                });
+                domStyle.set(rightPanel, {
+                  width: "20px"
                 });
               });
 
@@ -217,10 +221,14 @@ require(["esri/config", "esri/urlUtils", "esri/tasks/query", "dojo/on", "dojo/pa
                 evt.preventDefault();
                 evt.stopPropagation();
                 domStyle.set(infoPanel, {
-                    width: "20px"
+                    width: "15px",
+                    overflowY: "hidden"
                 });
                  domStyle.set(panels, {
                     opacity: 0
+                 });
+                 domStyle.set(rightPanel, {
+                  width: "15px"
                  });
                 
               });

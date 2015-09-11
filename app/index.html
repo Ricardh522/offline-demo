@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
-<html>
-<!-- <html manifest="appcache.manifest"> -->
+<!-- <html> -->
+<html manifest="appcache.manifest">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0,user-scalable=no, width=device-width"/>
@@ -94,16 +94,16 @@ a native app look this only happens after app is saved to the desktop-->
 
     <!-- Bootstrap core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
-    <link rel="stylesheet" href="javascript/3.14/dijit/themes/claro/claro.css">
-    <link rel="stylesheet" href= "javascript/3.14/esri/css/esri.css">
+    <link rel="stylesheet" href= "http://52.0.185.237/arcgis_js_api/library/3.14/3.14/dijit/themes/claro/claro.css">
+    <link rel="stylesheet" href= "http://52.0.185.237/arcgis_js_api/library/3.14/3.14/esri/css/esri.css">
 
     <link rel="stylesheet" href="css/bootstrapmap.min.css">
     <link rel="stylesheet" href="css/template-design.css">
  
     <!--Include a reference to offline.js which detects online/offline conditions-->
-    <script src="javascript/offline.min.js"></script>
-    <script src="javascript/jquery-1.11.1.js"></script>
-    <script src="javascript/bootstrap.min.js"></script>     
+    <script src="./javascript/offline.min.js"></script>
+    <script src="./javascript/jquery-1.11.1.js"></script>
+    <script src="./javascript/bootstrap.min.js"></script>     
 
 
     <script>
@@ -121,7 +121,7 @@ a native app look this only happens after app is saved to the desktop-->
 
     </script>
     
-    <script src="javascript/3.14/init.js" data-dojo-config="parseOnLoad: true, packages: [{name:'widgets', location:document.URL + 'javascript/widgets'}, {name:'utils', location: document.URL + 'javascript/utils'}], async: true,isDebug:true">
+    <script src="http://52.0.185.237/arcgis_js_api/library/3.14/3.14/init.js" data-dojo-config="parseOnLoad: true, packages: [{name:'widgets', location:document.URL + 'javascript/widgets'}, {name:'utils', location: document.URL + 'javascript/utils'}], async: true,isDebug:true">
 
     </script>
 
@@ -168,16 +168,17 @@ a native app look this only happens after app is saved to the desktop-->
 
         <div id='scalebarHousing'>
             <div id='measureHousing'>
-                <div id="titlePane" data-dojo-type="dijit/TitlePane" data-dojo-props="title:'Measurement', closable:'true', open:'true'">
+                <div id="titlePane" data-dojo-type="dijit/TitlePane" data-dojo-props="title:'Measurement', open:false">
                   <div id="esriMeasure"></div>
                 </div>
               </div>
         </div>
         <div id="leftPanel"></div>
+        <div id="rightHandle"></div>
         <div id="rightPanel"></div>
-        <div id="infoPanel" >
-          <div id="panels" class="touch-moveable">
-            <div id="layerListHousing">
+        <div id="infoPanel" class="touch-moveable">
+          <div id="panels" >
+              <div id="layerListHousing">
                   <div id='layerList'></div>
               </div>
               <div id="legendHousing">

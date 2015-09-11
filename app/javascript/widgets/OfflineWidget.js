@@ -322,7 +322,7 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
 
                             // Set up min and max boundaries for retrieving tiles
                             minZoomAdjust: -1,
-                            maxZoomAdjust: 4,
+                            maxZoomAdjust: 5,
                             resetZoom: 15,
                             _currentZoom: null,
                             // Important settings for determining which tile layers gets stored for offline use.
@@ -392,7 +392,7 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
 
             /*Begin the process of downloading the feature services and collecting them in layerholder*/
 
-            startFeatureDownload: function(param, callback) {
+            startFeatureDownload: function(param) {
                 this.offlineMap.showLoading();
                 var downloadTiles = dom.byId('downloadTiles');
                 var downloadFeatures = dom.byId('downloadFeatures');
@@ -432,11 +432,15 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                 function setLayerDef (layer, query, callback) {
                     layer.queryIds(query, function(oids) {
                         if (oids) {
+                            console.log(oids);
                             layer.setDefinitionExpression("OBJECTID IN (" + oids.join(',') + ")");
                             callback(layer);
                         } else {
+                            console.log("no oids returned");
                             callback(false);
                         }
+                    }, function(err) {
+                        console.log(false);
                     });
                 }
 
@@ -455,6 +459,8 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                                 content: {f: "json"},
                                 handleAs: "json",
                                 callbackParamName: "callback"
+                            }, {
+                                usePost: true
                             });
                             deferred.resolve(request);
                             return deferred;
@@ -474,8 +480,6 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                                  request.then(function(response) {
                                     if (response.type === "Feature Layer") {
                                         var id = response.id;
-                                        var geo = response.geometryType;
-                                        
                                         var fields = response.fields;
                                         // create the field info array for the feature layer
                                         var fieldinfo = [];
@@ -509,9 +513,11 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                                         var query = new Query();
                                         query.geometry = extent;
                                         query.returnGeometry = false;
-
+                                        query.outFields = ["*"];
+                                       
                                         setLayerDef(layer, query, function(e) {
                                             if (e !== false) {
+                                                var geo = response.geometryType;
                                                 switch (geo) {
                                                     case "esriGeometryPolygon":
                                                         layerholder.polys.push(e);
@@ -541,31 +547,35 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                                 _maplisten.remove();
                               
                                 offlineWidget.toc.refresh();
-                                var promises = [];
+                               
                                 var ids = map.graphicsLayerIds;
-                                arrayUtils.forEach(ids, function(id) {
+                                var promises = arrayUtils.map(ids, function(id) {
                                         var deferred = new Deferred();
-                                        var layer = map.getLayer(id); 
+                                        var layer = map.getLayer(id);
+                                        console.log(layer.name); 
                                         if (layer.graphics.length === 0) {
-                                            console.log("graphics have not be created yet");
-                                            var _listen = layer.on('update-end', function(e) {
-                                                _listen.remove();
-                                               deferred.resolve(layer);
-                                            });
+                                                 console.log("graphics have not be created yet");
+                                       
+                                            	var _listen = layer.on('update-end', function(evt) {
+                                            		_listen.remove();
+                                            		deferred.resolve(layer);
+                                            	});
+                                            
                                          } else if (layer.graphics.length > 0) {
                                                  deferred.resolve(layer);
                                         }
-                                        promises.push(deferred);        
+                                        return deferred;        
                                 });
 
-                                var allPromises = all(promises);
-                                allPromises.then(function(results) {
+                                
+                                all(promises).then(function(results) {
                                     console.log(results);
                                     
                                     offlineWidget.initOfflineDatabase(results);  
                                 });
                             });
-                            var layerlist = layerholder.polys.concat(layerholder.lines, layerholder.points);
+                            var points = layerholder.points;
+                            var layerlist = points.concat(layerholder.lines, layerholder.polys);
 
                             var tocLayers = [];
                             for (i = 0; i < layerlist.length; i +=1) {
@@ -603,11 +613,12 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                     that.offlineMap.initEvents();
                     callback(true);
                 }
-                initSplashPage();
-                // var splash = map.on('layers-add-result', function(e) {
-                //     splash.remove();
-                //     initSplashPage();
-                // });
+                
+                // initSplashPage();
+                var splash = map.on('layers-add-result', function(e) {
+                    splash.remove();
+                    initSplashPage();
+                });
 
                 
              },
@@ -645,6 +656,7 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                         else{
                             tileLayer.goOffline();
                             offlineWidget.clearMap(null, function(e) {
+                            	offlineWidget.loadOffline();
                                 arrayUtils.forEach(buttons, function(e) {
                                     if (domClass.contains(e, "disabled") === false) {
                                         domClass.add(e, "disabled");
@@ -859,7 +871,10 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                     offlineWidget.offlineMap.hideLoading();
                 });
 
-                offlineWidget.toc.layers = _layer;
+                offlineWidget.toc.layers = [{
+                	layer: _layer,
+                	sublayers: true
+                }];
                 offlineWidget.toc.refresh();
                 map.addLayer(_layer);
             },
@@ -970,7 +985,11 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                     this.offlineMap.showLoading();
 
                     var map = offlineWidget.map;
-                    var layerlist = [];
+                    var layerholder = {
+                        points: [],
+                        lines: [],
+                        polys: []
+                    };
                     // retreive the features from indexedDB and load into the map
                      offlineWidget.initDB(function(e) {
                             var editStore = offlineWidget.editStore;
@@ -1016,7 +1035,19 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                                             testLayer.infoTemplate = popupTemplate;
 
                                             testLayer.visible = true;
-                                            layerlist.push(testLayer);
+                                            var geo = testLayer.geometryType;
+                                            switch (geo) {
+                                                case "esriGeometryPolygon":
+                                                    layerholder.polys.push(testLayer);
+                                                    break;
+                                                case "esriGeometryPolyline":
+                                                    layerholder.lines.push(testLayer);
+                                                    break;
+                                                case "esriGeometryPoint":
+                                                    layerholder.points.push(testLayer);
+                                                    break;
+                                                }
+                                            
                                             cursor.continue();
 
                                         }
@@ -1025,7 +1056,10 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                                     tx.oncomplete = function(evt) {
                                       console.log("transaction completed collecting layers from store");
                                       promises = [];
-                                      
+                                        var polys = layerholder.polys;
+                                        var points = layerholder.points;
+                                        var lines = layerholder.lines;
+                                        var layerlist = polys.concat(lines, points);
                                         var tocLayers = [];
                                         for (i=0; i<layerlist.length; i+=1) {
                                             tocLayers.push({
@@ -1132,6 +1166,7 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
 
                                     var allEntries = all(entries);
                                     allEntries.then(function(results) {
+                                    	console.log(results);
                                         arrayUtils.forEach(results, function(entry) {
                                             console.log(entry);
                                             store.put(entry);
