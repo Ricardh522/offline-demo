@@ -32,9 +32,14 @@ import swPrecache from 'sw-precache';
 import gulpLoadPlugins from 'gulp-load-plugins';
 import {output as pagespeed} from 'psi';
 import pkg from './package.json';
+import esrislurp from 'esrislurp';
 
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
+
+gulp.task('download-esri-api', function(cb) {
+  esrislurp('src', '3.14', cb, cb);
+});
 
 // Lint JavaScript
 gulp.task('jshint', () =>
