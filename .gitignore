@@ -11,3 +11,11 @@ Demo-Grafton.sublime-workspace
 app/images/
 npm-debug.log
 *.png
+esri/
+dojo/
+dijit/
+dojox/
+put-selector/
+dgrid/
+util/
+xstyle/
