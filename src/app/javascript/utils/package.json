@@ -1,0 +1,10 @@
+{
+    "name": "utils",
+    "description": "app utils",
+    "version": "1.0",
+    "keywords": ["utils"],
+    "maintainers": [{
+        "name": "Richard Hughes"
+    }],
+    "dojoBuild": "profile.js"
+}

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <!-- <html> -->
-<html manifest="appcache.manifest">
+<html manifest="app/appcache.manifest">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0,user-scalable=no, width=device-width"/>
@@ -11,28 +11,28 @@ a native app look this only happens after app is saved to the desktop-->
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 
-<link rel="manifest" href="manifest.json"> 
-<link rel="apple-touch-icon-precomposed" sizes="57x57" href="images/apple-touch-icon-57x57.png" />
-<link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/apple-touch-icon-114x114.png" />
-<link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/apple-touch-icon-72x72.png" />
-<link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/apple-touch-icon-144x144.png" />
-<link rel="apple-touch-icon-precomposed" sizes="60x60" href="images/apple-touch-icon-60x60.png" />
-<link rel="apple-touch-icon-precomposed" sizes="120x120" href="images/apple-touch-icon-120x120.png" />
-<link rel="apple-touch-icon-precomposed" sizes="76x76" href="images/apple-touch-icon-76x76.png" />
-<link rel="apple-touch-icon-precomposed" sizes="152x152" href="images/apple-touch-icon-152x152.png" />
+<link rel="manifest" href="app/manifest.json"> 
+<link rel="apple-touch-icon-precomposed" sizes="57x57" href="app/resources/images/apple-touch-icon-57x57.png" />
+<link rel="apple-touch-icon-precomposed" sizes="114x114" href="app/resources/images/apple-touch-icon-114x114.png" />
+<link rel="apple-touch-icon-precomposed" sizes="72x72" href="app/resources/images/apple-touch-icon-72x72.png" />
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="app/resources/images/apple-touch-icon-144x144.png" />
+<link rel="apple-touch-icon-precomposed" sizes="60x60" href="app/resources/images/apple-touch-icon-60x60.png" />
+<link rel="apple-touch-icon-precomposed" sizes="120x120" href="app/resources/images/apple-touch-icon-120x120.png" />
+<link rel="apple-touch-icon-precomposed" sizes="76x76" href="app/resources/images/apple-touch-icon-76x76.png" />
+<link rel="apple-touch-icon-precomposed" sizes="152x152" href="app/resources/images/apple-touch-icon-152x152.png" />
 <!-- <link rel="apple-touch-startup-image" href="/startup.png"> -->
-<link rel="icon" type="image/png" href="images/favicon-196x196.png" sizes="196x196" />
-<link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96" />
-<link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32" />
-<link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16" />
-<link rel="icon" type="image/png" href="images/favicon-128.png" sizes="128x128" />
+<link rel="icon" type="image/png" href="app/resources/images/favicon-196x196.png" sizes="196x196" />
+<link rel="icon" type="image/png" href="app/resources/images/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/png" href="app/resources/images/favicon-32x32.png" sizes="32x32" />
+<link rel="icon" type="image/png" href="app/resources/images/favicon-16x16.png" sizes="16x16" />
+<link rel="icon" type="image/png" href="app/resources/images/favicon-128.png" sizes="128x128" />
 <meta name="application-name" content="Mobile App Bootstrap with Offline-js"/>
 <meta name="msapplication-TileColor" content="#FFFFFF" />
-<meta name="msapplication-TileImage" content="images/mstile-144x144.png" />
-<meta name="msapplication-square70x70logo" content="images/mstile-70x70.png" />
-<meta name="msapplication-square150x150logo" content="images/mstile-150x150.png" />
-<meta name="msapplication-wide310x150logo" content="images/mstile-310x150.png" />
-<meta name="msapplication-square310x310logo" content="images/mstile-310x310.png" />
+<meta name="msapplication-TileImage" content="app/resources/images/mstile-144x144.png" />
+<meta name="msapplication-square70x70logo" content="app/resources/images/mstile-70x70.png" />
+<meta name="msapplication-square150x150logo" content="app/resources/images/mstile-150x150.png" />
+<meta name="msapplication-wide310x150logo" content="app/resources/images/mstile-310x150.png" />
+<meta name="msapplication-square310x310logo" content="app/resources/images/mstile-310x310.png" />
 
 <title>Mobile App Bootstrap with Offline-js</title>
 
@@ -94,16 +94,16 @@ a native app look this only happens after app is saved to the desktop-->
 
     <!-- Bootstrap core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
-    <link rel="stylesheet" href= "http://52.0.185.237/arcgis_js_api/library/3.14/3.14/dijit/themes/claro/claro.css">
-    <link rel="stylesheet" href= "http://52.0.185.237/arcgis_js_api/library/3.14/3.14/esri/css/esri.css">
+    <link rel="stylesheet" href= "esri/dijit/themes/claro/claro.css">
+    <link rel="stylesheet" href= "esri/css/esri.css">
 
     <link rel="stylesheet" href="css/bootstrapmap.min.css">
     <link rel="stylesheet" href="css/template-design.css">
  
     <!--Include a reference to offline.js which detects online/offline conditions-->
-    <script src="./javascript/offline.min.js"></script>
-    <script src="./javascript/jquery-1.11.1.js"></script>
-    <script src="./javascript/bootstrap.min.js"></script>     
+    <script src="app/javascript/offline.min.js"></script>
+    <script src="app/javascript/jquery-1.11.1.js"></script>
+    <script src="app/javascript/bootstrap.min.js"></script>     
 
 
     <script>
@@ -120,21 +120,46 @@ a native app look this only happens after app is saved to the desktop-->
 
 
     </script>
-    
-    <script src="http://52.0.185.237/arcgis_js_api/library/3.14/3.14/init.js" data-dojo-config="parseOnLoad: true, packages: [{name:'widgets', location:document.URL + 'javascript/widgets'}, {name:'utils', location: document.URL + 'javascript/utils'}], async: true,isDebug:true">
-
-    </script>
+    <script>
+    var dojoConfig = {
+      // Enable the AMD loader
+      async: true,
+      // Define the base URL for all of our modules and packages
+      baseUrl: '.',
+      // Enable debugging
+      isDebug: true,
+      // Register the packages we are going to be using. These same packages should be defined in the
+      // build profile in `app.profile.js`.
+      packages: [
+        // Using a string as a package is shorthand for `{ name: 'app', location: 'app' }`
+        'app',
+        'dgrid',
+        'dijit',
+        'dojo',
+        'dojox',
+        'esri',
+        'put-selector',
+        'xstyle',
+      ],
+      // Use the smaller, faster "lite" CSS selector engine, which works in all browsers IE8+
+      selectorEngine: 'lite',
+      // Fix the loader to use normal AMD resolution of unregistered module paths (relative to `baseUrl`)
+      // instead of the legacy Dojo resolution method (relative to the parent directory of `baseUrl`)
+      tlmSiblingOfDojo: false
+    };
+  </script>
+  <script src="dojo/dojo.js"></script>
 
 
 
     <!-- Include a reference to IndexedDBShim for library to work on Safari 7.x -->
-    <script src="javascript/IndexedDBShim.js"></script>
-    <script src='javascript/main.js'></script>
+    <script src="app/javascript/IndexedDBShim.js"></script>
+    <script require(['app/main.js']);></script>
 </head>
 <body class="claro">
       <!-- Splash Page -->
     <div id="splashPage" class="flex-container">
-        <img id="logo" src="images/logo-rsw.png" />
+        <img id="logo" src="app/resources/images/logo-rsw.png" />
     </div>
     <!-- Map Page -->
          
@@ -161,7 +186,7 @@ a native app look this only happens after app is saved to the desktop-->
           
       <div class="container-fluid">   
           <div id="mapDiv">
-              <img id="loadingImg" src="images/loading-throb.gif" />
+              <img id="loadingImg" src="app/resources/images/loading-throb.gif" />
           </div>
       </div>
    

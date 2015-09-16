@@ -1,0 +1,10 @@
+{
+    "name": "widgets",
+    "description": "app widgets",
+    "version": "1.0",
+    "keywords": ["widgets"],
+    "maintainers": [{
+        "name": "Richard Hughes"
+    }],
+    "dojoBuild": "package.js"
+}
