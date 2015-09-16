@@ -5,7 +5,7 @@ require(["esri/config", "esri/urlUtils", "esri/tasks/query", "dojo/on", "dojo/pa
      "esri/graphic", "esri/layers/GraphicsLayer", "esri/symbols/PictureMarkerSymbol", "esri/dijit/HomeButton",
      "esri/dijit/Scalebar", "esri/layers/GeoRSSLayer", "esri/geometry/Extent", "esri/SpatialReference", "esri/layers/ImageParameters",
      "esri/arcgis/OAuthInfo", "esri/IdentityManager", "esri/dijit/Legend", "esri/dijit/Popup", "esri/dijit/PopupTemplate", "dojo/dom-construct",
-      "esri/symbols/SimpleFillSymbol", "esri/dijit/LayerList", "javascript/utils/bootstrapmap.min.js", "utils/appCacheManager", "widgets/OfflineWidget",
+      "esri/symbols/SimpleFillSymbol", "esri/dijit/LayerList", "utils/bootstrapmap.min", "utils/appCacheManager", "widgets/OfflineWidget",
    "dojo/domReady!"],
 
     function (esriConfig, urlUtils, Query, on, parser, mouse, SimpleRenderer, BasemapGallery, SimpleMarkerSymbol, SimpleLineSymbol, Color,

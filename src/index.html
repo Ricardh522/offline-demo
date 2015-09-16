@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
-<!-- <html> -->
-<html manifest="app/appcache.manifest">
+<html>
+<!-- <html manifest="app/appcache.manifest"> -->
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0,user-scalable=no, width=device-width"/>
@@ -93,12 +93,12 @@ a native app look this only happens after app is saved to the desktop-->
   
 
     <!-- Bootstrap core CSS -->
-    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
-    <link rel="stylesheet" href= "esri/dijit/themes/claro/claro.css">
+    <link href="app/resources/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link rel="stylesheet" href= "esri/themes/calcite/css/calcite.css">
     <link rel="stylesheet" href= "esri/css/esri.css">
 
-    <link rel="stylesheet" href="css/bootstrapmap.min.css">
-    <link rel="stylesheet" href="css/template-design.css">
+    <link rel="stylesheet" href="app/resources/css/bootstrapmap.min.css">
+    <link rel="stylesheet" href="app/resources/css/all.css">
  
     <!--Include a reference to offline.js which detects online/offline conditions-->
     <script src="app/javascript/offline.min.js"></script>
@@ -120,10 +120,13 @@ a native app look this only happens after app is saved to the desktop-->
 
 
     </script>
+
+
     <script>
-    var dojoConfig = {
+    dojoConfig = {
       // Enable the AMD loader
       async: true,
+      parseOnLoad: true,
       // Define the base URL for all of our modules and packages
       baseUrl: '.',
       // Enable debugging
@@ -133,13 +136,21 @@ a native app look this only happens after app is saved to the desktop-->
       packages: [
         // Using a string as a package is shorthand for `{ name: 'app', location: 'app' }`
         'app',
+         {
+          name: "utils",
+          location: "./app/javascript/utils"
+        },
+        {
+          name: "widgets",
+          location: "./app/javascript/widgets"
+        },
         'dgrid',
         'dijit',
         'dojo',
         'dojox',
         'esri',
         'put-selector',
-        'xstyle',
+        'xstyle'
       ],
       // Use the smaller, faster "lite" CSS selector engine, which works in all browsers IE8+
       selectorEngine: 'lite',
@@ -148,15 +159,16 @@ a native app look this only happens after app is saved to the desktop-->
       tlmSiblingOfDojo: false
     };
   </script>
-  <script src="dojo/dojo.js"></script>
 
-
-
+  <script src="./dojo/dojo.js"></script>
+  
     <!-- Include a reference to IndexedDBShim for library to work on Safari 7.x -->
-    <script src="app/javascript/IndexedDBShim.js"></script>
-    <script require(['app/main.js']);></script>
+    <script src="./app/javascript/IndexedDBShim.js"></script>
+    
+     <script require(['./app/main.js']);></script>
+     
 </head>
-<body class="claro">
+<body class="calcite">
       <!-- Splash Page -->
     <div id="splashPage" class="flex-container">
         <img id="logo" src="app/resources/images/logo-rsw.png" />
@@ -212,5 +224,6 @@ a native app look this only happens after app is saved to the desktop-->
               </div>
           </div>
         </div>
+        <script src="app/main.js"></script>
 </body>
 </html>

@@ -12,7 +12,7 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
    "esri/renderers/SimpleRenderer", "esri/symbols/TextSymbol", "esri/request",
      "dojo/dom-construct", "esri/symbols/SimpleFillSymbol",
      "esri/symbols/SimpleLineSymbol", "esri/Color", "esri/dijit/util/busyIndicator", "esri/dijit/LayerList",
-      "javascript/utils/offline-tiles-advanced-min.js"],
+      "utils/offline-tiles-advanced-min"],
   function (declare, arrayUtils, parser, ready, domStyle, dom, domClass, on, mouse, Deferred, domAttr, all,
    debouncer, webMercatorUtils, Geoprocessor, _WidgetBase, IdentifyTask,
   IdentifyParameters, IdentifyResult, FeatureSet, ArcGISDynamicMapServiceLayer,

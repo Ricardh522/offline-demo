@@ -37,6 +37,14 @@ var profile = {
   packages: [
     // Using a string as a package is shorthand for `{ name: 'app', location: 'app' }`
     'app',
+    {
+      name: "utils",
+      location: "../src/app/javascript/utils"
+    },
+    {
+      name: "widgets",
+      location: "../src/app/javascript/widgets"
+    },
     'dgrid',
     'dijit',
     'dojo',
@@ -106,12 +114,12 @@ var profile = {
   // <http://dojotoolkit.org/reference-guide/dojo/has.html>.
   staticHasFeatures: {
     // The trace & log APIs are used for debugging the loader, so we do not need them in the build.
-    'dojo-trace-api': false,
-    'dojo-log-api': false,
+    'dojo-trace-api': true,
+    'dojo-log-api': true,
 
     // This causes normally private loader data to be exposed for debugging. In a release build, we do not need
     // that either.
-    'dojo-publish-privates': false,
+    'dojo-publish-privates': true,
 
     // This application is pure AMD, so get rid of the legacy loader.
     'dojo-sync-loader': false,

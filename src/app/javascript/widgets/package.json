@@ -1,10 +1,4 @@
 {
-    "name": "widgets",
-    "description": "app widgets",
-    "version": "1.0",
-    "keywords": ["widgets"],
-    "maintainers": [{
-        "name": "Richard Hughes"
-    }],
+    "releaseDir": "../../../../dist/app/javascript/widgets",
     "dojoBuild": "package.js"
 }
