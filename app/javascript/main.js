@@ -245,5 +245,13 @@ require(["esri/config", "esri/urlUtils", "esri/tasks/query", "dojo/on", "dojo/pa
                     };
                 };
               });
+
+             document.addEventListener('touchmove', function(event) {
+                if (!$(event.target).parents().hasClass("touch-moveable"))
+                    {
+                      event.preventDefault();
+                      event.stopPropagation();
+                  }
+              } , false); 
         
       });
