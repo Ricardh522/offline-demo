@@ -293,13 +293,7 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                                     });
 
 
-                                    document.addEventListener('touchmove', function(event) {
-                                      if (!$(event.target).parents().hasClass("touch-moveable"))
-                                          {
-                                            event.preventDefault();
-                                            event.stopPropagation();
-                                        }
-                                    } , false); 
+                                    
                                 }
                     };
 
