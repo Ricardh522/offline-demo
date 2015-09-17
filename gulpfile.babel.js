@@ -31,13 +31,14 @@ import autoprefixer from 'gulp-autoprefixer';
 import stylus from 'gulp-stylus';
 import sourcemaps from 'gulp-sourcemaps';
 import concat from 'gulp-concat-css';
+import del from 'del'
 
 const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
 
 // Lint JavaScript
 gulp.task('jshint', () =>
-  gulp.src(['src/app/main.js', 'src/app/javascript/widgets/*.js'])
+  gulp.src(['src/app/*.js'])
     .pipe(reload({stream: true, once: true}))
     .pipe($.jshint())
     .pipe($.jshint.reporter('jshint-stylish'))
@@ -62,17 +63,25 @@ gulp.task('stylus', () => {
     .pipe(gulp.dest('src/app/resources/styles/build'));
 });
 
-gulp.task('prefix', () => {
-    gulp.src('src/app/resources/styles/build/*.css')
-        .pipe(sourcemaps.init())
-        .pipe(autoprefixer())
-        .pipe(concat('all.css'))
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest('src/app/resources/css'));
+gulp.task('del', () => {
+  del.sync(['src/app/resources/css/all.css', '!src/app/resources/css'], function(paths) {
+    console.log('Deleted files/folders:\n', paths.join('\n'));
+  });
 });
 
+
+  gulp.task('prefix', () => {
+      gulp.src('src/app/resources/styles/build/*.css')
+          .pipe(sourcemaps.init())
+          .pipe(autoprefixer())
+          .pipe(concat('all.css'))
+          .pipe(sourcemaps.write('.'))
+          .pipe(gulp.dest('src/app/resources/css'));
+  });
+
+
 // Watch files for changes & reload
-gulp.task('serve', ['stylus', 'prefix'], () => {
+gulp.task('serve', ['stylus', 'del', 'prefix'], () => {
   browserSync({
     notify: false,
     // Customize the BrowserSync console logging prefix
@@ -84,16 +93,11 @@ gulp.task('serve', ['stylus', 'prefix'], () => {
     server: ['.tmp', 'src']
   });
 
-  gulp.watch(['src/app/**/*.html'], reload);
+  gulp.watch(['src/app/templates/*.html'], reload);
+  gulp.watch(['src/index.html'], reload);
   gulp.watch(['src/app/resources/**/**'], reload);
-  gulp.watch(['src/app/javascript/main.js'], ['jshint']);
-  gulp.watch(['src/app/javascript/widgets/*.js'], reload);
-  gulp.watch(['src/app/resources/images/*'], reload);
-  gulp.watch(['dist/app/**/*.html'], reload);
-  gulp.watch(['dist/app/resources/**/**'], reload);
-  gulp.watch(['dist/app/javascript/main.js'], ['jshint']);
-  gulp.watch(['dist/app/javascript/widgets/*.js'], reload);
-  gulp.watch(['dist/app/resources/images/*'], reload);
+  gulp.watch(['src/app/*.js'], ['jshint', reload]);
+  gulp.watch(['dist/index.html'], reload);
 });
 
 // Build and serve the output from the dist build

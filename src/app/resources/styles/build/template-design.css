@@ -145,7 +145,6 @@ body {
   z-index: 50;
   height: 90%;
   background-color: #fff;
-  overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
 }
 #panels {

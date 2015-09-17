@@ -1,0 +1,44 @@
+<div>
+ <!-- Splash Page -->
+    <div id="splashPage" class="flex-container">
+        <img id="logo" src="app/resources/images/logo-rsw.png" />
+    </div>
+    <!-- Map Page -->
+         
+        <div id = "buttons">
+            <div id = "esriButtons">
+                <div id="homeButton"></div>
+                <div id="esriLocate"></div>
+            </div>
+            <div id="offlineButtons" data-dojo-type="app/OfflineWidget"></div>
+      </div>
+          
+      <div class="container-fluid">   
+          <div id="mapDiv">
+              <img id="loadingImg" src="app/resources/images/loading-throb.gif" />
+          </div>
+      </div>
+   
+
+      <div id='scalebarHousing'>
+          <div id='measureHousing'>
+              <div id="titlePane" data-dojo-type="dijit/TitlePane" data-dojo-props="title:'Measurement', open:false">
+                <div id="esriMeasure"></div>
+              </div>
+            </div>
+      </div>
+      <div id="leftPanel"></div>
+      <div id="rightHandle"></div>
+      <div id="rightPanel"></div>
+      <div id="infoPanel" class="touch-moveable">
+        <div id="panels" >
+            <div id="layerListHousing">
+                <div id='layerList'></div>
+            </div>
+            <div id="legendHousing">
+                <span>Legend</span>
+                <div id="legendDiv"></div>
+            </div>
+        </div>
+      </div>
+  </div>

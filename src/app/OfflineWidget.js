@@ -1,6 +1,6 @@
 define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "dojo/dom-style", 
   "dojo/dom", "dojo/dom-class", "dojo/on",  "dojo/mouse", "dojo/Deferred", "dojo/dom-attr", "dojo/promise/all",
-   "utils/debouncer", "esri/geometry/webMercatorUtils", "esri/tasks/Geoprocessor",
+   "app/utils/debouncer.js", "esri/geometry/webMercatorUtils", "esri/tasks/Geoprocessor",
     "dijit/_WidgetBase", "esri/tasks/IdentifyTask", "esri/tasks/IdentifyParameters",
      "esri/tasks/IdentifyResult","esri/tasks/FeatureSet",
       "esri/layers/ArcGISDynamicMapServiceLayer",
@@ -12,42 +12,81 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
    "esri/renderers/SimpleRenderer", "esri/symbols/TextSymbol", "esri/request",
      "dojo/dom-construct", "esri/symbols/SimpleFillSymbol",
      "esri/symbols/SimpleLineSymbol", "esri/Color", "esri/dijit/util/busyIndicator", "esri/dijit/LayerList",
-      "utils/offline-tiles-advanced-min"],
+      "dijit/_TemplatedMixin",  "dijit/_AttachMixin", "dojo/text!./templates/OfflineWidget.html", "app/utils/offline-tiles-advanced-min.js"],
   function (declare, arrayUtils, parser, ready, domStyle, dom, domClass, on, mouse, Deferred, domAttr, all,
    debouncer, webMercatorUtils, Geoprocessor, _WidgetBase, IdentifyTask,
   IdentifyParameters, IdentifyResult, FeatureSet, ArcGISDynamicMapServiceLayer,
    ImageParameters,  Extent, PopupTemplate, FeatureLayer, arcgisUtils, graphicsUtils, geometryEngine,
     Query, QueryTask, Point, Polygon, LabelLayer, SimpleRenderer, TextSymbol,
      esriRequest, domConstruct, SimpleFillSymbol, SimpleLineSymbol,
-    Color, busyIndicator, LayerList) { 
+    Color, busyIndicator, LayerList,  _TemplatedMixin, _AttachMixin, template) { 
 
-     return declare("OfflineWidget", [_WidgetBase], {   
+     return declare("OfflineWidget", [_WidgetBase, _TemplatedMixin, _AttachMixin], {   
 
-     
+            templateString: template,
+
+            constructor: function(params, srcNodeRef) {
+               console.log("creating widget with params " + JSON.stringify(params) + " on node " + srcNodeRef);
+            },
+
             indexes: [],
             map: "",
             onlineTest: "",
-            editStore: {DB_NAME:"features_store",  
-                        DB_STORE_NAME:  "features",
-                        DB_UID:  "objectid"
-                    },
+            editStore: {
+                DB_NAME:"features_store",  
+                DB_STORE_NAME:  "features",
+                DB_UID:  "objectid"
+            },
             
-            initialize: function() {
-                offlineWidget.initModules(null, function(e) {
-                  offlineWidget.init(null, function(e) {
-                    console.log("offline widget has been fully initialized");
-                    });
-                });
+            initialize: function(callback) {
+                 var map = this.map
+                 var tileUrl = this.tileUrl;
+                 (function() {
+
+                      
+                               console.log("OfflineMapStartup Function fired");
+                              
+                            
+
+                          
+
+                            if (Offline.state === 'up') {
+                                _isOnline = true;
+                            }
+                                
+                            var tileLayer = new O.esri.Tiles.OfflineTileEnablerLayer(
+                                tileUrl,
+                                function (evt) {
+                                    console.log("Offline tile lib enabled. App is: " + Offline.state);
+                                },_isOnline);
+                      
+                            tileLayer._minZoom = 14;
+                            tileLayer._maxZoom = 19;
+                            // Set up min and max boundaries for retrieving tiles
+                            tileLayer.minZoomAdjust = -1;
+                            tileLayer. maxZoomAdjust = 5;
+                            tileLayer.resetZoom = 15;
+                            tileLayer._currentZoom = null;
+                            // Important settings for determining which tile layers gets stored for offline use.
+                            tileLayer.EXTENT_BUFFER = 0; //buffers the map extent in meters
+                            tileLayer._currentExtent =  null;
+                            // For cancelling the download of tiles
+                            tileLayer._wantToCancel = false;
+                            tileLayer._downloadState =  "downloaded";
+                            
+                            startup();
+                    })();
             },
 
             validate: function(callback) {
+                var that = this;
                 (function() {
                     var downloadTiles = dom.byId('downloadTiles');
                     var downloadFeatures = dom.byId('downloadFeatures');
                     var clearButton = dom.byId('clearButton');
                     var buttons = [downloadTiles, downloadFeatures, clearButton];
 
-                    offlineWidget.validateOnline(function(result) {
+                    that.validateOnline(function(result) {
                      
                         if(result !== 'failed') {
                             _isOnline = true;
@@ -77,21 +116,22 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                     
                 },
 
-            startup: function(params, callback) {
-               var editStore = this.editStore;
-               var DB_NAME = editStore.DB_NAME;
-               var DB_STORE_NAME = editStore.DB_STORE_NAME;
-                 
+            startup: function(params) {
                 this.onlineTest = params.onlineTest;
                 this.mapService = params.mapService;
                 this.map = params.map;
                 this.tileServiceUrl = params.tileServiceUrl;
 
-                offlineWidget.validate(function(e) {
+               var that = this;
+               var editStore = this.editStore;
+               var DB_NAME = editStore.DB_NAME;
+               var DB_STORE_NAME = editStore.DB_STORE_NAME;
+                 
+                this.validate(function(e) {
                     console.log(e);
                 });
 
-                Offline.on('up down', offlineWidget.updateState);
+                Offline.on('up down', that.updateState);
 
                 //Make sure map shows up after a browser refresh
                 if(Offline.state === 'up') {
@@ -136,21 +176,21 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                 $('#downloadTiles').on('mouseup', function(e) {
                     e.preventDefault();
                     $(this).css('-webkit-transform', 'scale(1, 1)');
-                    offlineWidget.downloadTiles();
+                    that.downloadTiles();
                 });
 
 
                 $('#downloadFeatures').on('mouseup', function(e) {
                     e.preventDefault();
                     $(this).css('-webkit-transform', 'scale(1, 1)');
-                    offlineWidget.startFeatureDownload(null);
+                    that.startFeatureDownload(null);
 
                 });
 
                 $('#clearButton').on('mouseup', function(e) {
                     e.preventDefault();
                     $(this).css('-webkit-transform', 'scale(1, 1)');
-                    offlineWidget.offlineMap.showLoading();
+                    that.offlineMap.showLoading();
                     var db;
                     var openDb = function (params, callback) {
                         request = indexedDB.open(DB_NAME, 11);
@@ -221,173 +261,6 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                     });  
                 });
             
-            },
-
-            initModules: function(params, callback){
-                    (function() {
-                    offlineWidget.offlineMap = {
-                         startup: function() {
-                               console.log("OfflineMapStartup Function fired");
-                                var img = dom.byId('loadingImg');
-                                var map = offlineWidget.map;
-                                var handle = busyIndicator.create({
-                                        backgroundOpacity: 0.01,
-                                        target: img,
-                                        imageUrl: "images/loading-throb.gif",
-                                        zIndex: 100
-                                    });
-                                handle.hide();
-                                this.handle = handle;
-                                domStyle.set(img, 'visibility', "hidden");
-                            },
-
-                            showLoading: function() {
-                                var img = dom.byId('loadingImg');
-                                var map = offlineWidget.map;
-                                this.handle.show();
-                                map.disableMapNavigation();
-                                map.disablePan();
-                              },
-
-                              hideLoading: function() {
-                                var img = dom.byId('loadingImg');
-                                var map = offlineWidget.map;
-                                this.handle.hide();
-                                map.enableMapNavigation();
-                                map.enablePan();
-                              },
-
-                             initEvents: function() {
-                            
-                                    var map = offlineWidget.map;
-                                    map.on("zoom-end",function(evt) {
-                                        _currentExtent = evt.extent;
-                                        offlineWidget.updateLocalStorage();
-                                        Offline.check();
-                                    });
-
-                                    map.on("pan-end",function(evt) {
-                                        _currentExtent = evt.extent;
-                                        offlineWidget.updateLocalStorage();
-                                        Offline.check();
-                                    });
-
-
-                                    map.on("pan", function(evt) {
-                                        var that = offlineWidget.offlineMap;
-                                        that.hideLoading();
-                                    });
-
-                                    map.on("zoom-start", function(evt) {
-                                        var that = offlineWidget.offlineMap;
-                                        that.showLoading();
-                                    });
-
-                                    map.on("zoom-end", function(evt) {
-                                        var that = offlineWidget.offlineMap;
-                                        that.hideLoading();
-                                    });
-
-                                    debouncer.setOrientationListener(250,function(){
-                                        console.log("orientation"); orientationChange = true;
-                                    });
-
-
-                                    document.addEventListener('touchmove', function(event) {
-                                      if (!$(event.target).parents().hasClass("touch-moveable"))
-                                          {
-                                            event.preventDefault();
-                                            event.stopPropagation();
-                                        }
-                                    } , false); 
-                                }
-                    };
-
-                    offlineWidget.offlineTiles = {
-                         startup: function() {
-                                if (Offline.state === 'up') {
-                                    _isOnline = true;
-                                }
-                                
-                                var tileLayer = new O.esri.Tiles.OfflineTileEnablerLayer(
-                                    offlineWidget.tileServiceUrl,
-                                    function (evt) {
-                                        console.log("Offline tile lib enabled. App is: " + Offline.state);
-                                    },_isOnline);
-                          
-                                tileLayer._minZoom = 14;
-                                tileLayer._maxZoom = 19;
-                                this.tileLayer = tileLayer;
-                            },
-
-                            // Set up min and max boundaries for retrieving tiles
-                            minZoomAdjust: -1,
-                            maxZoomAdjust: 5,
-                            resetZoom: 15,
-                            _currentZoom: null,
-                            // Important settings for determining which tile layers gets stored for offline use.
-                            EXTENT_BUFFER: 0, //buffers the map extent in meters
-                            _currentExtent: null,
-                            // For cancelling the download of tiles
-                            _wantToCancel: false,
-                            _downloadState: "downloaded",
-                            
-                            initOffline: function()
-                            {
-                                console.log("extending");  
-                                Offline.on('up', this.goOnline );
-                                Offline.on('down', this.goOffline );
-                            },
-
-                            updateTileCountEstimation: function()
-                            {
-                                console.log('updating');
-                                var tileLayer = this.tileLayer;
-                                var map = offlineWidget.map;
-                                var totalEstimation = { tileCount:0, sizeBytes:0 };
-                                var minLevel = 14;
-                                var maxLevel = 19;
-                                this.tileLayer.estimateTileSize(function(tileSize)
-                                {
-                                    var totalMem = [];
-                                    for(var level=minLevel; level<=maxLevel; level++)
-                                    {
-                                        var levelEstimation = tileLayer.getLevelEstimation(map.extent,level,tileSize);
-
-                                        totalEstimation.tileCount += levelEstimation.tileCount;
-                                        totalEstimation.sizeBytes += levelEstimation.sizeBytes;
-
-                                        if( levelEstimation.tileCount > 0)
-                                        {
-                                           
-                                            console.log(rowContent);
-                                            totalMem.push(newstring);
-                                        }
-
-                                        if( totalEstimation.tileCount > 5000 )
-                                        {
-                                          break;
-                                        }
-                                    }
-                                 
-                                });
-                            },
-
-                           
-                            cancel: function()
-                            {
-                                cancelRequested = true;
-                            }
-                    };
-
-                    offlineWidget.offlineMap.startup();
-                    offlineWidget.offlineTiles.startup();
-
-                    callback(true);
-
-                })();
-                    
-                    
             },
 
             /*Begin the process of downloading the feature services and collecting them in layerholder*/
@@ -592,36 +465,7 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                 });
             },
           
-            init: function(params, callback) {
-                var that = this;
-                var map = this.map;
-                var mapService = this.mapService;
-                var tileLayer = offlineWidget.offlineTiles.tileLayer;
-
-                // map.addLayer(mapService);
-                map.addLayers([tileLayer, mapService]);
-
-
-                function initSplashPage() {
-                    var intro = $("#splashPage");
-                    var mapPage = $(".container-fluid");
-                    
-                    mapPage.css('visibility', 'visible');
-                    mapPage.css('opacity', 1);
-                    intro.css('opacity', 0);
-                    intro.css('visibility', 'hidden');
-                    that.offlineMap.initEvents();
-                    callback(true);
-                }
-                
-                // initSplashPage();
-                var splash = map.on('layers-add-result', function(e) {
-                    splash.remove();
-                    initSplashPage();
-                });
-
-                
-             },
+            
          /*////////////////////////////////
         /Online Offline Methods
        //////////////////////////////////*/
@@ -672,6 +516,7 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
              * @param callback
              */
             validateOnline: function(callback) {
+                var that = this;
                 (function(evt) {
                     Offline.check();
 
@@ -684,7 +529,7 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                     }, maxWaitTime);
 
                     if (Offline.state === 'up') {
-                        req.open("GET", offlineWidget.onlineTest, false);
+                        req.open("GET", that.onlineTest, false);
                         req.onreadystatechange = function() {
                             var status = req.status;
                             if (this.readyState != 4) {
@@ -880,7 +725,7 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
             },
 
             updateLocalStorage: function() {
-                var map = offlineWidget.map;
+                var map = this.map;
                 var zoom = map.getZoom();
                 var extent = JSON.stringify(map.extent);
 

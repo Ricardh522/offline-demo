@@ -94,16 +94,17 @@ a native app look this only happens after app is saved to the desktop-->
 
     <!-- Bootstrap core CSS -->
     <link href="app/resources/css/bootstrap.min.css" rel="stylesheet" media="screen">
-    <link rel="stylesheet" href= "esri/themes/calcite/css/calcite.css">
+    <link rel="stylesheet" href= "dijit/themes/claro/claro.css">
     <link rel="stylesheet" href= "esri/css/esri.css">
+    <link rel="stylesheet" href= "esri/css/calcite/calcite.css">
 
     <link rel="stylesheet" href="app/resources/css/bootstrapmap.min.css">
     <link rel="stylesheet" href="app/resources/css/all.css">
  
     <!--Include a reference to offline.js which detects online/offline conditions-->
-    <script src="app/javascript/offline.min.js"></script>
-    <script src="app/javascript/jquery-1.11.1.js"></script>
-    <script src="app/javascript/bootstrap.min.js"></script>     
+    <script src="app/libs/offline.min.js"></script>
+    <script src="app/libs/jquery-1.11.1.js"></script>
+    <script src="app/libs/bootstrap.min.js"></script>     
 
 
     <script>
@@ -122,108 +123,14 @@ a native app look this only happens after app is saved to the desktop-->
     </script>
 
 
-    <script>
-    dojoConfig = {
-      // Enable the AMD loader
-      async: true,
-      parseOnLoad: true,
-      // Define the base URL for all of our modules and packages
-      baseUrl: '.',
-      // Enable debugging
-      isDebug: true,
-      // Register the packages we are going to be using. These same packages should be defined in the
-      // build profile in `app.profile.js`.
-      packages: [
-        // Using a string as a package is shorthand for `{ name: 'app', location: 'app' }`
-        'app',
-         {
-          name: "utils",
-          location: "./app/javascript/utils"
-        },
-        {
-          name: "widgets",
-          location: "./app/javascript/widgets"
-        },
-        'dgrid',
-        'dijit',
-        'dojo',
-        'dojox',
-        'esri',
-        'put-selector',
-        'xstyle'
-      ],
-      // Use the smaller, faster "lite" CSS selector engine, which works in all browsers IE8+
-      selectorEngine: 'lite',
-      // Fix the loader to use normal AMD resolution of unregistered module paths (relative to `baseUrl`)
-      // instead of the legacy Dojo resolution method (relative to the parent directory of `baseUrl`)
-      tlmSiblingOfDojo: false
-    };
-  </script>
+    
 
-  <script src="./dojo/dojo.js"></script>
+  <script data-dojo-config="async: true, deps: ['app/run']" src="./dojo/dojo.js"></script>
   
     <!-- Include a reference to IndexedDBShim for library to work on Safari 7.x -->
-    <script src="./app/javascript/IndexedDBShim.js"></script>
-    
-     <script require(['./app/main.js']);></script>
-     
+    <script src="./app/libs/IndexedDBShim.js"></script>
 </head>
-<body class="calcite">
-      <!-- Splash Page -->
-    <div id="splashPage" class="flex-container">
-        <img id="logo" src="app/resources/images/logo-rsw.png" />
-    </div>
-    <!-- Map Page -->
-         
-        <div id = "buttons">
-            <div id = "esriButtons">
-                <div id="homeButton"></div>
-                <div id="esriLocate"></div>
-            </div>
-           
-          <div id = "offlineButtons" class = "btn-group" role="group" aria-label="imagery and feature download">
-                <button type='button'  id="downloadTiles" class="btn btn-primary disabled">
-                  <span class= "glyphicon glyphicon-cloud-download" aria-hidden="true"></span>
-                </button>
-                
-                <button type='button' id="downloadFeatures" class='btn btn-default disabled'>
-                    <span id="img" class= "glyphicon glyphicon-download-alt" aria-hidden="true"></span>
-                </button>
-
-                <button type='button' id="clearButton" class="btn btn-default disabled">
-                     <span class= "glyphicon glyphicon-cloud-upload" aria-hidden="true"></span>
-                </button>
-          </div>
-      </div>
-          
-      <div class="container-fluid">   
-          <div id="mapDiv">
-              <img id="loadingImg" src="app/resources/images/loading-throb.gif" />
-          </div>
-      </div>
-   
-
-        <div id='scalebarHousing'>
-            <div id='measureHousing'>
-                <div id="titlePane" data-dojo-type="dijit/TitlePane" data-dojo-props="title:'Measurement', open:false">
-                  <div id="esriMeasure"></div>
-                </div>
-              </div>
-        </div>
-        <div id="leftPanel"></div>
-        <div id="rightHandle"></div>
-        <div id="rightPanel"></div>
-        <div id="infoPanel" class="touch-moveable">
-          <div id="panels" >
-              <div id="layerListHousing">
-                  <div id='layerList'></div>
-              </div>
-              <div id="legendHousing">
-                  <span>Legend</span>
-                  <div id="legendDiv"></div>
-              </div>
-          </div>
-        </div>
-        <script src="app/main.js"></script>
+<body class="claro">
+    <div data-dojo-type="app/App" id="appDiv"></div>
 </body>
 </html>

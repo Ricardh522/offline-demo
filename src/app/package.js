@@ -4,17 +4,13 @@ var profile = (function(){
         packages:[
              {
                 name: "utils",
-                location: "app/javascript/utils"
-             },
-             {
-                name: "widgets",
-                location: "app/javascript/widgets"
+                location: "app/utils"
              }
         ],
         resourceTags: {
             amd: function(filename, mid) {
-                return /\.js$/.test("main");
+                return /\.js$/.test(filename);
             }
         }
-    }
+    };
 })();

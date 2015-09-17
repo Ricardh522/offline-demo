@@ -11,6 +11,10 @@ SRCDIR="$BASEDIR/src"
 # Directory containing dojo build utilities
 TOOLSDIR="$SRCDIR/util/buildscripts"
 
+LOADERID="app/run"
+
+LOADERCONF="$SRCDIR/$LOADERID.js"
+
 # Destination directory for built code
 DISTDIR="$BASEDIR/dist"
 
