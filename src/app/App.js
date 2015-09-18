@@ -1,29 +1,32 @@
-define(["dojo/_base/declare", "dijit/_WidgetBase", "esri/config", "esri/urlUtils", "esri/tasks/query", "dojo/on", "dojo/parser", "dojo/mouse", "esri/renderers/SimpleRenderer", "esri/dijit/BasemapGallery",
-     "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "esri/Color", 
-     "dojo/_base/array", "dojo/dom", "dojo/query", "dojox/gesture/swipe", "esri/dijit/Measurement", "esri/dijit/LocateButton", "esri/layers/ArcGISDynamicMapServiceLayer",
+define(["dojo/_base/declare", "dijit/_WidgetBase", "esri/config", "esri/urlUtils", "esri/tasks/query", "dojo/on", "dojo/mouse",
+ "esri/renderers/SimpleRenderer", "esri/dijit/BasemapGallery", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", 
+ "esri/Color", "app/utils/debouncer.js","dojo/_base/array", "dojo/dom", "dojo/query", "dojox/gesture/swipe", "esri/dijit/Measurement",
+  "esri/dijit/LocateButton", "esri/layers/ArcGISDynamicMapServiceLayer", "dojo/ready", "dojo/parser", "dijit/TitlePane",
       "esri/layers/FeatureLayer", "esri/geometry/Point", "dojo/dom-style", "dojo/dom-attr", 
-     "esri/graphic", "esri/layers/GraphicsLayer", "esri/symbols/PictureMarkerSymbol", "esri/dijit/HomeButton",
+     "esri/graphic", "esri/layers/GraphicsLayer", "esri/symbols/PictureMarkerSymbol", "esri/dijit/HomeButton", "esri/dijit/util/busyIndicator",
      "esri/dijit/Scalebar", "esri/layers/GeoRSSLayer", "esri/geometry/Extent", "esri/SpatialReference", "esri/layers/ImageParameters",
      "esri/arcgis/OAuthInfo", "esri/IdentityManager", "esri/dijit/Legend", "esri/dijit/Popup", "esri/dijit/PopupTemplate", "dojo/dom-construct",
-      "esri/symbols/SimpleFillSymbol", "esri/dijit/LayerList", "app/utils/bootstrapmap.min.js", "app/utils/appCacheManager.js", "./OfflineWidget",
-   "dijit/_TemplatedMixin", "dijit/_WidgetsInTemplateMixin", 'dijit/_AttachMixin', "dojo/text!./templates/App.html", "dojo/domReady!"],
+      "esri/symbols/SimpleFillSymbol", "esri/dijit/LayerList", "app/utils/bootstrapmap.min.js", "app/utils/appCacheManager.js", "app/OfflineWidget",
+   "dijit/_TemplatedMixin", "dijit/_WidgetsInTemplateMixin", "dijit/_AttachMixin","dojo/text!./templates/App.html",  "app/utils/offline-tiles-advanced-min.js"],
 
-    function (declare, _WidgetBase, esriConfig, urlUtils, Query, on, parser, mouse, SimpleRenderer, BasemapGallery, SimpleMarkerSymbol, SimpleLineSymbol, Color,
-        arrayUtils, dom, query, swipe, Measurement, LocateButton, ArcGISDynamicMapServiceLayer, FeatureLayer, Point, domStyle, domAttr, 
-        Graphic, GraphicsLayer, PictureMarkerSymbol, HomeButton, Scalebar,
+    function (declare, _WidgetBase, esriConfig, urlUtils, Query, on, mouse, SimpleRenderer, BasemapGallery, SimpleMarkerSymbol, SimpleLineSymbol, Color,
+        debouncer, arrayUtils, dom, query, swipe, Measurement, LocateButton, ArcGISDynamicMapServiceLayer, ready, parser, TitlePane, FeatureLayer, Point, domStyle, domAttr, 
+        Graphic, GraphicsLayer, PictureMarkerSymbol, HomeButton, busyIndicator, Scalebar,
         GeoRSSLayer, Extent, SpatialReference, ImageParameters, OAuthInfo, esriId, Legend, Popup,  PopupTemplate, domConstruct, SimpleFillSymbol, LayerList,
-         BootstrapMap, AppCacheManager, OfflineWidget, _TemplatedMixin, _WidgetsInTemplateMixin, _AttachMixin, template) {
+         BootstrapMap, AppCacheManager, OfflineWidget, _TemplatedMixin, _WidgetsInTemplateMixin,  _AttachMixin, template) {
 
-          return declare("App", [_WidgetBase, _TemplatedMixin,  _AttachMixin, _WidgetsInTemplateMixin, OfflineWidget], {
+        return declare("App", [ _WidgetBase, _TemplatedMixin,  _WidgetsInTemplateMixin, _AttachMixin, OfflineWidget], {
             
             templateString: template,
             widgetsInTemplate: true,
             
             constructor: function(params, srcNodeRef) {
-               console.log("creating widget with params " + dojo.toJson(params) + " on node " + srcNodeRef);
+               console.log(srcNodeRef);
             },
 
+            loadhandle: null,
             startup: function() {
+
               var appCacheManager;
               initAppCacheManager();
               
@@ -120,15 +123,27 @@ define(["dojo/_base/declare", "dijit/_WidgetBase", "esri/config", "esri/urlUtils
                   infoWindow: popup
               });
       
-            function initHomeButton() {
+            
+            var _loadListen = map.on('load', function(e) {
+                _loadListen.remove();
+               demo.endLoading();   
+             });
+                   
+  
+            var _listen = map.on("layers-add-result", function(e) {
+               _listen.remove();
+               offlineWidget.initPanZoomListeners();
+            });
+
+      
                   var homeButton = new HomeButton({
                       map: map,
                       visible: true
                   }, 'homeButton');
                   homeButton.startup();
-              }
+              
 
-              function initEsriLocate() {
+         
                   var esriLocate = new LocateButton({
                       centerAt: true,
                       geolocationOptions: {
@@ -143,16 +158,16 @@ define(["dojo/_base/declare", "dijit/_WidgetBase", "esri/config", "esri/urlUtils
                       useTracking: true,
                       visible: true
                   }, 'esriLocate');
-              }
+              
 
-               function initScalebar() {
+               
                   var scalebar = new Scalebar({
                       map: map,
                       scalebarUnit: "dual"
-                  }, dojo.byId('scalebarHousing'));
-              }
+                  }, dom.byId('scalebarHousing'));
+              
 
-              function initLegend() {
+           
                   var legend = new Legend({
                       arrangement: 2,
                       autoUpdate: true,
@@ -161,82 +176,71 @@ define(["dojo/_base/declare", "dijit/_WidgetBase", "esri/config", "esri/urlUtils
                       }, "legendDiv");
 
                       legend.startup();
-              }
+          
+      
+              var measure = new Measurement({
+                map: map,
+                lineSymbol: new SimpleLineSymbol(
+                    SimpleLineSymbol.STYLE_SOLID,
+                     new Color([255, 0, 0]),
+                     3)
+              });
+                measure.startup();
+                 // Create title pane for the measure tool
+                var tp = new TitlePane({
+                  title:"Measurement",
+                  content: measure,
+                  open: false
+                });
+                dom.byId("measurePane").appendChild(tp.domNode);
+                tp.startup();
 
-              function initLayerList() {
-                  var toc = new LayerList({
-                      layers: null,
-                      map: map,
-                      removeUnderscores: true,
-                      subLayers: true
-                    }, "layerList");
-                  toc.startup();
-                  offlineWidget.toc = toc;
-              }
-              
-              function initMeasure() {
-                  var measure = new Measurement({
-                    map: map,
-                    lineSymbol: new SimpleLineSymbol(
-                        SimpleLineSymbol.STYLE_SOLID,
-                         new Color([255, 0, 0]),
-                         3)
-                  }, dom.byId("esriMeasure"));
-                    measure.startup();
-                }
-
-             function initHandle() {
-                 var handle = busyIndicator.create({
+                 loadhandle = busyIndicator.create({
                       backgroundOpacity: 0.01,
-                      target: img,
+                      target: mapDiv,
                       imageUrl: "app/resources/images/loading-throb.gif",
                       zIndex: 100
                   });
-                  var img = dom.byId('loadingImg');
-                  domStyle.set(img, 'visibility', "hidden");
-                  handle.hide();
-              }
-
-               map.on('load', function(e) {
-                   initScalebar();
-                   initHomeButton();
-                   initEsriLocate();
-                   initLegend();
-                   initLayerList();
-                   initMeasure();
-                   initHandle();
-              });
-
-              var offlineWidget = new OfflineWidget({}, dom.byId("offlineButtons"));
               
-              offlineWidget.startup({
+
+              function hideLoading() {
+                  loadhandle.hide();
+                  map.enableMapNavigation();
+                  map.enablePan();
+                }
+    
+               function showLoading() {
+                  loadhandle.show();
+                  map.disableMapNavigation();
+                  map.disablePan();
+                }
+
+                var toc = new LayerList({
+                  layers: null,
+                  map: map,
+                  removeUnderscores: true,
+                  subLayers: true,
+                }, "layerList");
+                toc.startup();
+
+              var offlineWidget = new OfflineWidget({
                   map: map,
                   onlineTest: serverUrl,
                   mapService: mapService,
-                  tileServiceUrl: tileServiceUrl
-                });
+                  tileServiceUrl: tileServiceUrl,
+                  toc: toc
+              }, dom.byId("offlineButtons"));
+              
+             offlineWidget.startup();
 
-                offlineWidget.initialize(function(e) {
-                  var mapService = offlineWidget.mapService;
-                  var tileLayer = offlineWidget.offlineTiles.tileLayer;
-                  map.addLayers([tileLayer, mapService]);
-                  var _listen = map.on("layers-add-result", function(e) {
-                    _listen.remove();
-                    initSplashPage();
-                  });
-                });
+             
+          
+            offlineWidget.initialize(function(e) {
+              var tileLayer = e.tiledMapService;
+              map.addLayers([tileLayer, mapService]);
+            });
                 
-               function initSplashPage() {
-                    var intro = $("#splashPage");
-                    var mapPage = $(".container-fluid");
-                    
-                    mapPage.css('visibility', 'visible');
-                    mapPage.css('opacity', 1);
-                    intro.css('opacity', 0);
-                    intro.css('visibility', 'hidden');
-                    initEvents();
-                }
-
+            
               // DOM panel movement events
               var rightPanel = dom.byId("rightPanel");
               var infoPanel = dom.byId("infoPanel");
@@ -286,35 +290,10 @@ define(["dojo/_base/declare", "dijit/_WidgetBase", "esri/config", "esri/urlUtils
                   }
                 });
 
-               var initEvents = function() {
+               // Create Map Events
+               
 
-                    var hideLoading = function() {
-                        var img = dom.byId('loadingImg');
-                        this.waithandle.hide();
-                        map.enableMapNavigation();
-                        map.enablePan();
-                      }.bind(this);
-
-                     var showLoading = function() {
-                        var img = dom.byId('loadingImg');
-                        this.waithandle.show();
-                        map.disableMapNavigation();
-                        map.disablePan();
-                      }.bind(this);
-
-                    map.on("zoom-end",function(evt) {
-                        _currentExtent = evt.extent;
-                        that.updateLocalStorage();
-                        Offline.check();
-                    });
-
-                    map.on("pan-end",function(evt) {
-                        _currentExtent = evt.extent;
-                        offlineWidget.updateLocalStorage();
-                        Offline.check();
-                    });
-
-
+               
                     map.on("pan", function(evt) {
                         hideLoading();
                     });
@@ -339,11 +318,7 @@ define(["dojo/_base/declare", "dijit/_WidgetBase", "esri/config", "esri/urlUtils
                             event.stopPropagation();
                         }
                     } , false); 
-                }
              }
-          });
-
-          ready(function() {
-            parser.parse();
-          });
       });
+
+});

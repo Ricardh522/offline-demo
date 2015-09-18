@@ -1,37 +1,35 @@
-define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "dojo/dom-style", 
+define(["dojo/_base/declare","dojo/_base/array", "dojo/dom-style", 
   "dojo/dom", "dojo/dom-class", "dojo/on",  "dojo/mouse", "dojo/Deferred", "dojo/dom-attr", "dojo/promise/all",
-   "app/utils/debouncer.js", "esri/geometry/webMercatorUtils", "esri/tasks/Geoprocessor",
-    "dijit/_WidgetBase", "esri/tasks/IdentifyTask", "esri/tasks/IdentifyParameters",
+    "esri/geometry/webMercatorUtils", "esri/tasks/Geoprocessor", "dojo/_base/lang",
+     "esri/tasks/IdentifyTask", "esri/tasks/IdentifyParameters",
      "esri/tasks/IdentifyResult","esri/tasks/FeatureSet",
       "esri/layers/ArcGISDynamicMapServiceLayer",
        "esri/layers/ImageParameters", "esri/geometry/Extent",
         "esri/dijit/PopupTemplate", "esri/layers/FeatureLayer", "esri/arcgis/utils",
          "esri/graphicsUtils", "esri/geometry/geometryEngine", "esri/tasks/query",
           "esri/tasks/QueryTask", "esri/geometry/Point",
-  "esri/geometry/Polygon", "esri/layers/LabelLayer",
+  "esri/geometry/Polygon", 
    "esri/renderers/SimpleRenderer", "esri/symbols/TextSymbol", "esri/request",
      "dojo/dom-construct", "esri/symbols/SimpleFillSymbol",
-     "esri/symbols/SimpleLineSymbol", "esri/Color", "esri/dijit/util/busyIndicator", "esri/dijit/LayerList",
-      "dijit/_TemplatedMixin",  "dijit/_AttachMixin", "dojo/text!./templates/OfflineWidget.html", "app/utils/offline-tiles-advanced-min.js"],
-  function (declare, arrayUtils, parser, ready, domStyle, dom, domClass, on, mouse, Deferred, domAttr, all,
-   debouncer, webMercatorUtils, Geoprocessor, _WidgetBase, IdentifyTask,
+     "esri/symbols/SimpleLineSymbol", "esri/Color",  "dijit/_WidgetBase",
+      "dijit/_TemplatedMixin", "dojo/text!./templates/OfflineWidget.html", "app/utils/offline-tiles-advanced-min.js"],
+  function (declare, arrayUtils, domStyle, dom, domClass, on, mouse, Deferred, domAttr, all,
+ webMercatorUtils, Geoprocessor, lang, IdentifyTask,
   IdentifyParameters, IdentifyResult, FeatureSet, ArcGISDynamicMapServiceLayer,
    ImageParameters,  Extent, PopupTemplate, FeatureLayer, arcgisUtils, graphicsUtils, geometryEngine,
-    Query, QueryTask, Point, Polygon, LabelLayer, SimpleRenderer, TextSymbol,
+    Query, QueryTask, Point, Polygon, SimpleRenderer, TextSymbol,
      esriRequest, domConstruct, SimpleFillSymbol, SimpleLineSymbol,
-    Color, busyIndicator, LayerList,  _TemplatedMixin, _AttachMixin, template) { 
+    Color, _WidgetBase, _TemplatedMixin, template) { 
 
-     return declare("OfflineWidget", [_WidgetBase, _TemplatedMixin, _AttachMixin], {   
+     return declare("OfflineWidget", [_WidgetBase, _TemplatedMixin], {   
 
             templateString: template,
 
-            constructor: function(params, srcNodeRef) {
-               console.log("creating widget with params " + JSON.stringify(params) + " on node " + srcNodeRef);
+            constructor: function(kwArgs, srcNodeRef) {
+               console.log("creating widget with kwArgs");
+               declare.safeMixin(this, kwArgs);
             },
-
             indexes: [],
-            map: "",
-            onlineTest: "",
             editStore: {
                 DB_NAME:"features_store",  
                 DB_STORE_NAME:  "features",
@@ -39,43 +37,38 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
             },
             
             initialize: function(callback) {
-                 var map = this.map
-                 var tileUrl = this.tileUrl;
-                 (function() {
-
-                      
-                               console.log("OfflineMapStartup Function fired");
-                              
-                            
-
-                          
-
-                            if (Offline.state === 'up') {
-                                _isOnline = true;
-                            }
+                 var map = this.map;
+                 var tileUrl = this.tileServiceUrl;
+                
+                 console.log("OfflineWidget Initializing Function fired");
+                    
+                if (Offline.state === 'up') {
+                    _isOnline = true;
+                }
                                 
-                            var tileLayer = new O.esri.Tiles.OfflineTileEnablerLayer(
-                                tileUrl,
-                                function (evt) {
-                                    console.log("Offline tile lib enabled. App is: " + Offline.state);
-                                },_isOnline);
-                      
-                            tileLayer._minZoom = 14;
-                            tileLayer._maxZoom = 19;
-                            // Set up min and max boundaries for retrieving tiles
-                            tileLayer.minZoomAdjust = -1;
-                            tileLayer. maxZoomAdjust = 5;
-                            tileLayer.resetZoom = 15;
-                            tileLayer._currentZoom = null;
-                            // Important settings for determining which tile layers gets stored for offline use.
-                            tileLayer.EXTENT_BUFFER = 0; //buffers the map extent in meters
-                            tileLayer._currentExtent =  null;
-                            // For cancelling the download of tiles
-                            tileLayer._wantToCancel = false;
-                            tileLayer._downloadState =  "downloaded";
-                            
-                            startup();
-                    })();
+                this.tileLayer = new O.esri.Tiles.OfflineTileEnablerLayer(
+                    tileUrl,
+                    function (evt) {
+                        console.log("Offline tile lib enabled. App is: " + Offline.state);
+                    },_isOnline);
+
+                this._minZoom = 14;
+                this._maxZoom = 19;
+                // Set up min and max boundaries for retrieving tiles
+                this.minZoomAdjust = -1;
+                this. maxZoomAdjust = 5;
+                this.resetZoom = 15;
+                this._currentZoom = null;
+                // Important settings for determining which tile layers gets stored for offline use.
+                this.EXTENT_BUFFER = 0; //buffers the map extent in meters
+                this._currentExtent =  null;
+                // For cancelling the download of tiles
+                this._wantToCancel = false;
+                this._downloadState =  "downloaded";
+            
+                callback({
+                    tiledMapService: this.tileLayer,
+                });
             },
 
             validate: function(callback) {
@@ -116,12 +109,8 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                     
                 },
 
-            startup: function(params) {
-                this.onlineTest = params.onlineTest;
-                this.mapService = params.mapService;
-                this.map = params.map;
-                this.tileServiceUrl = params.tileServiceUrl;
-
+            startup: function() {
+              
                var that = this;
                var editStore = this.editStore;
                var DB_NAME = editStore.DB_NAME;
@@ -179,18 +168,17 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                     that.downloadTiles();
                 });
 
-
-                $('#downloadFeatures').on('mouseup', function(e) {
+                var featureDownloadButton = dom.byId('downloadFeatures');
+                on(featureDownloadButton, "mouseup", lang.hitch(this, function(e) {
                     e.preventDefault();
-                    $(this).css('-webkit-transform', 'scale(1, 1)');
-                    that.startFeatureDownload(null);
-
-                });
+                    domStyle.set(featureDownloadButton,'-webkit-transform', 'scale(1, 1)');
+                    this.startFeatureDownload(null);
+                  }));
+               
 
                 $('#clearButton').on('mouseup', function(e) {
                     e.preventDefault();
                     $(this).css('-webkit-transform', 'scale(1, 1)');
-                    that.offlineMap.showLoading();
                     var db;
                     var openDb = function (params, callback) {
                         request = indexedDB.open(DB_NAME, 11);
@@ -244,18 +232,17 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
 
                     openDb(null, function(e) {
                         db = e;
-                        var map = offlineWidget.map;
                         var process = clearObjectStore(db);
                         process.then( function(results) {
                             var rem = function reCreate(callback) {
                                 db.close();
-                                offlineWidget.clearMap(null, function(e) {
+                                that.clearMap(null, function(e) {
                                     callback();
                                 });
                             };
                             
                             rem(function(e) {
-                                offlineWidget.displayMap(); 
+                                that.displayMap(); 
                             }); 
                         });
                     });  
@@ -265,42 +252,40 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
 
             /*Begin the process of downloading the feature services and collecting them in layerholder*/
 
-            startFeatureDownload: function(param) {
-                this.offlineMap.showLoading();
+            startFeatureDownload: function(param) {                
                 var downloadTiles = dom.byId('downloadTiles');
                 var downloadFeatures = dom.byId('downloadFeatures');
 
                 var clearButton = dom.byId('clearButton');
                 var buttons = [downloadTiles, downloadFeatures, clearButton];
                 var map = this.map;
-
-                var mapService = this.mapService.url;
-
-                 function labelLayers(lyr, callback) {
-                    if (lyr.geometryType === 'esriGeometryPolyline') {
-                        var myGraphics = new MyGraphics();
-                        var forceMainLabel = "{DIAMETER} {MATERIAL} {MATERIALCLASS} {ITEMDESCRIPTION}";
-                        var gravityMainLabel = "{DIAMETER} {MATERIAL} {MATERIALCLASS} @ {SLOPE} %"; 
-                        var reclaimMainLabel = "{DIAMETER} {MATERIAL}";
-                        var pressurizedMainLabel = "{DIAMETER} {MATERIAL} {MATERIALCLASS} {ITEMDESCRIPTION}";
-                        var needLabel = {
-                            "RECLAIM MAIN": reclaimMainLabel,
-                            "GRAVITY MAIN": gravityMainLabel,
-                            "FORCE MAIN": forceMainLabel,
-                            "PRESSURIZED MAIN": pressurizedMainLabel
-                        };
-                        var name = lyr.name.toUpperCase();
-                        var keys = Object.keys(needLabel);
-                        if (keys.indexOf(name) !== -1) {
-                            var label = needLabel.name;
-                            myGraphics.labelLayer(label, lyr, function(e) {
-                                callback(lyr);
-                            });
-                        }
-                    } else {
-                        callback(lyr);
-                        }
-                    }
+                var mapServiceUrl = this.mapService.url;
+                var that = this;
+                 // function labelLayers(lyr, callback) {
+                 //    if (lyr.geometryType === 'esriGeometryPolyline') {
+                 //        var myGraphics = new MyGraphics();
+                 //        var forceMainLabel = "{DIAMETER} {MATERIAL} {MATERIALCLASS} {ITEMDESCRIPTION}";
+                 //        var gravityMainLabel = "{DIAMETER} {MATERIAL} {MATERIALCLASS} @ {SLOPE} %"; 
+                 //        var reclaimMainLabel = "{DIAMETER} {MATERIAL}";
+                 //        var pressurizedMainLabel = "{DIAMETER} {MATERIAL} {MATERIALCLASS} {ITEMDESCRIPTION}";
+                 //        var needLabel = {
+                 //            "RECLAIM MAIN": reclaimMainLabel,
+                 //            "GRAVITY MAIN": gravityMainLabel,
+                 //            "FORCE MAIN": forceMainLabel,
+                 //            "PRESSURIZED MAIN": pressurizedMainLabel
+                 //        };
+                 //        var name = lyr.name.toUpperCase();
+                 //        var keys = Object.keys(needLabel);
+                 //        if (keys.indexOf(name) !== -1) {
+                 //            var label = needLabel.name;
+                 //            myGraphics.labelLayer(label, lyr, function(e) {
+                 //                callback(lyr);
+                 //            });
+                 //        }
+                 //    } else {
+                 //        callback(lyr);
+                 //        }
+                 //    }
 
                 function setLayerDef (layer, query, callback) {
                     layer.queryIds(query, function(oids) {
@@ -317,16 +302,18 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                     });
                 }
 
-                offlineWidget.clearMap(null, function(evt) {
+                
+                this.clearMap(null, function(evt) {
                     
                       var extent = map.extent;
                       var i = [];
                       var index = 0;
-                      var visibleLayers = offlineWidget.mapService.visibleLayers;
+                     
+                      var visibleLayers = that.mapService.visibleLayers;
 
                         var requests = arrayUtils.map(visibleLayers, function(id) {
                             var deferred = new Deferred();
-                            var item = mapService + "/" + id;
+                            var item = mapServiceUrl + "/" + id;
                             var request = new esriRequest({
                                 url: item,
                                 content: {f: "json"},
@@ -375,7 +362,7 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                                             showAttachments: false
                                         });
 
-                                        var url  = mapService + "/" + id;
+                                        var url  = mapServiceUrl + "/" + id;
                                          var layer = new FeatureLayer(url, {
                                             mode: FeatureLayer.MODE_SNAPSHOT,
                                             infoTemplate: popupTemplate,
@@ -419,7 +406,7 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                             var _maplisten = map.on('layers-add-result', function(evt) {
                                 _maplisten.remove();
                               
-                                offlineWidget.toc.refresh();
+                                that.toc.refresh();
                                
                                 var ids = map.graphicsLayerIds;
                                 var promises = arrayUtils.map(ids, function(id) {
@@ -444,7 +431,7 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                                 all(promises).then(function(results) {
                                     console.log(results);
                                     
-                                    offlineWidget.initOfflineDatabase(results);  
+                                    that.initOfflineDatabase(results);  
                                 });
                             });
                             var points = layerholder.points;
@@ -457,7 +444,7 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                                 };
                                 tocLayers.push(outlayer);
                             }
-                            offlineWidget.toc.layers = tocLayers;
+                            that.toc.layers = tocLayers;
                            
                             map.addLayers(layerlist);
                         });
@@ -470,11 +457,12 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
         /Online Offline Methods
        //////////////////////////////////*/
             updateState: function(){
+              var that = this;
                 if(Offline.state === 'up'){
-                    offlineWidget.toggleStateUp(true);
+                    that.toggleStateUp(true);
                 }
                 else{
-                    offlineWidget.toggleStateUp(false);
+                    that.toggleStateUp(false);
                 }
             },
 
@@ -483,12 +471,12 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                 var downloadFeatures = dom.byId('downloadFeatures');
                 var clearButton = dom.byId('clearButton');
                 var buttons = [downloadTiles, downloadFeatures, clearButton];
-
-                var tileLayer = offlineWidget.offlineTiles.tileLayer;
+                var that = this;
+                var tileLayer = this.offlineTiles.tileLayer;
                     if(state){
                         tileLayer.goOnline();
-                        offlineWidget.clearMap(null, function(e) {
-                            offlineWidget.displayMap();
+                        that.clearMap(null, function(e) {
+                            that.displayMap();
                             arrayUtils.forEach(buttons, function(e) {
                                     if (domClass.contains(e, "disabled") === true) {
                                         domClass.remove(e, "disabled");
@@ -499,8 +487,8 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                     }
                         else{
                             tileLayer.goOffline();
-                            offlineWidget.clearMap(null, function(e) {
-                            	offlineWidget.loadOffline();
+                            that.clearMap(null, function(e) {
+                            	that.loadOffline();
                                 arrayUtils.forEach(buttons, function(e) {
                                     if (domClass.contains(e, "disabled") === false) {
                                         domClass.add(e, "disabled");
@@ -595,12 +583,11 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
              * in the local database
              */
             downloadTiles: function(callback){
-                this.offlineMap.showLoading();
-
-                var tileLayer = this.offlineTiles.tileLayer;
-                var minZoomAdjust = this.offlineTiles.minZoomAdjust;
-                var maxZoomAdjust = this.offlineTiles.maxZoomAdjust;
-                var EXTENT_BUFFER = this.offlineTiles.EXTENT_BUFFER;
+                
+                var tileLayer = this.tileLayer;
+                var minZoomAdjust = this.minZoomAdjust;
+                var maxZoomAdjust = this.maxZoomAdjust;
+                var EXTENT_BUFFER = this.EXTENT_BUFFER;
                 var map = this.map;
                 
 
@@ -613,7 +600,7 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                         console.log("success deleting tile cache");
                         var self = this.data;
 
-                        if( offlineWidget.downloadState == 'downloading')
+                        if(this.downloadState == 'downloading')
                         {
                             console.log("cancel!");
                             _wantToCancel = true;
@@ -629,8 +616,8 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                             _wantToCancel = false;
                              var message = "<span id='message' style='z-index: 100; position: absolute; top: 0px; right: 5px; font: black; arial; text-shadow: 1px 1px 3px white'>downloading tiles...</span>";
                             $('#navbar' ).append(message);
-                            tileLayer.prepareForOffline(zoom.min, zoom.max, extent, offlineWidget.reportProgress.bind(this));
-                            offlineWidget.downloadState = 'downloading';
+                            tileLayer.prepareForOffline(zoom.min, zoom.max, extent, this.reportProgress.bind(this));
+                            this.downloadState = 'downloading';
                         }
                     }
 
@@ -643,32 +630,27 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
             /**
              * Reports the process while downloading tiles. and initiates the feature layer downloads upon completion
              */
-            reportProgress: function(progress)
-            {
+            reportProgress: function(progress) {
                
-               
-                if(progress.hasOwnProperty("countNow")){
-                 
-                  
-                }
+               var that = this;
+                if(progress.hasOwnProperty("countNow")){}
 
-                if( progress.finishedDownloading )
-                {
-                    var that = offlineWidget.offlineMap;
-                    $('#navbar > span').remove();
+                if( progress.finishedDownloading ){
+                    
+                
                     if( progress.cancelRequested )
                     {
-                        offlineWidget.downloadState = 'cancelled';
+                        that.downloadState = 'cancelled';
                         alert("Tile download was cancelled");
-                        that.hideLoading();
+                    
                     }
                     else
                     {
-                        offlineWidget.downloadState = 'downloaded';
+                        that.downloadState = 'downloaded';
                         alert("Tile download complete");
-                        that.hideLoading();
+          
 
-                        offlineWidget.offlineTiles.tileLayer.saveToFile("myOfflineTilesLayer.csv", function(success, msg) {
+                        that.tileLayer.saveToFile("myOfflineTilesLayer.csv", function(success, msg) {
                             console.log(success);
                             console.log(msg);
                         });
@@ -687,6 +669,7 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                 var graphicIds = map.graphicsLayerIds;
                 var mapIds = map.layerIds;
                 var totalIds = mapIds.concat(graphicIds);
+                var that = this;
                 if (totalIds.length > 1) {
                     for (i=1; i < totalIds.length; i++) {
                         var layer = map.getLayer(totalIds[i]);
@@ -698,29 +681,26 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                     callback();
                 }
 
-                 if (offlineWidget.hasOwnProperty("toc")) {
-                        offlineWidget.layers = null;
+                 if (that.hasOwnProperty("toc")) {
+                        that.layers = null;
                     }
-
-
-
-                
             },
 
             displayMap: function() {
                 var map = this.map;
                 var _layer = this.mapService;
+                var that = this;
                 var _listener = map.on('layer-add-result', function(e) {
                     console.log("Map Service Added back to Map");
                     _listener.remove();
-                    offlineWidget.offlineMap.hideLoading();
+                 
                 });
 
-                offlineWidget.toc.layers = [{
+                this.toc.layers = [{
                 	layer: _layer,
                 	sublayers: true
                 }];
-                offlineWidget.toc.refresh();
+                this.toc.refresh();
                 map.addLayer(_layer);
             },
 
@@ -743,7 +723,8 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
             ///////////////////////////////////////////
 
                 initOfflineDatabase: function(layerholder) {
-                    offlineWidget.buildDatabase(layerholder, function(e) {
+                    var that = this;
+                    that.buildDatabase(layerholder, function(e) {
                         console.log(e);
                         var clearNode = dom.byId("clearButton");
                         var tileNode = dom.byId("downloadTiles");
@@ -752,22 +733,22 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                         if(_isOnline === true){
                              var test = 1;
                              if (test === 0) {
-                                offlineWidget.clearMap(null, function(e) {
-                                    offlineWidget.displayMap();
+                                that.clearMap(null, function(e) {
+                                    that.displayMap();
                                     
                                     domClass.remove(tileNode, "disabled");
                                     domClass.remove(clearNode, "disabled");
                                     domClass.remove(featureNode, "disabled");
                                 });
                             } else {
-                                 offlineWidget.clearMap(null, function(e) {
-                                    offlineWidget.loadOffline();
+                                 that.clearMap(null, function(e) {
+                                    that.loadOffline();
                                 });
                             }
 
                         } else {
-                             offlineWidget.clearMap(null, function(e) {
-                                offlineWidget.loadOffline();
+                             that.clearMap(null, function(e) {
+                                that.loadOffline();
                                 domClass.add(tileNode, "disabled");
                                 domClass.add(clearNode, "disabled");
                                 domClass.add(featureNode, "disabled");
@@ -784,39 +765,41 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                  */
 
                 initPanZoomListeners: function () {
-                   
-                    var map = offlineWidget.map;
+                   this.validate(function(e) {
+                        console.log(_isOnline + " :ArcServer machine accessible");
+                    });
 
+                    var map = this.map;
+                    var that = this;
+                  
                     map.on("zoom-end",function(evt) {
-                        offlineWidget.updateLocalStorage();
-                        offlineWidget.validate(function(e) {
-                            Offline.check();
-                        });
+                        _currentExtent = evt.extent;
+                        that.updateLocalStorage();
+                        Offline.check();
                     });
 
                     map.on("pan-end",function(evt) {
-                        offlineWidget.updateLocalStorage();
+                        _currentExtent = evt.extent;
+                        that.updateLocalStorage();
                         Offline.check();
-                        if (Offline.state === 'up') {
-                            _isOnline = true;
-                            _isOffline = false;
-                        } else {
-                            _isOnline = false;
-                            _isOffline = true;
-                        }
-
-                        offlineWidget.validate(function(e) {
-                            console.log(_isOnline + " :ArcServer machine accessible");
-                        });
                     });
+
+                      if (Offline.state === 'up') {
+                          _isOnline = true;
+                          _isOffline = false;
+                      } else {
+                          _isOnline = false;
+                          _isOffline = true;
+                      }
                 },
+                
 
                  /**
                  * Load the feature while offline using information stored in database
                  */
 
                  getFeatureLayerJSONDataStore: function(inlayer, callback){
-                        var dataStore = offlineWidget.getFeatureLayerJSON(inlayer);
+                        var dataStore = this.getFeatureLayerJSON(inlayer);
                         var success;
                         if (typeof dataStore === "object") {
                             success = true;
@@ -827,20 +810,20 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                     },
 
                 loadOffline: function () {
-                    this.offlineMap.showLoading();
-
-                    var map = offlineWidget.map;
+            
+                    var map = this.map;
+                    var that = this;
                     var layerholder = {
                         points: [],
                         lines: [],
                         polys: []
                     };
                     // retreive the features from indexedDB and load into the map
-                     offlineWidget.initDB(function(e) {
-                            var editStore = offlineWidget.editStore;
+                     this.initDB(function(e) {
+                            var editStore = that.editStore;
                             var request = indexedDB.open(editStore.DB_NAME, 11);
                             request.onsuccess = function(event) {
-                                    var map = offlineWidget.map;
+                                    var map = that.map;
                                     var db = event.target.result;
                                     var tx = db.transaction([editStore.DB_STORE_NAME], 'readonly');
                                     var store = tx.objectStore(editStore.DB_STORE_NAME);
@@ -915,13 +898,13 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                                           
                                             var _layerListen = map.on('layers-add-result', function(evt) {
                                                 _layerListen.remove();
-                                                offlineWidget.toc.layers = tocLayers;
-                                                offlineWidget.toc.refresh();
-                                                offlineWidget.offlineMap.hideLoading();
+                                                that.toc.layers = tocLayers;
+                                                that.toc.refresh();
+                                        
                                                 
                                                 });
                                             
-                                        offlineWidget.map.addLayers(layerlist);
+                                       that.map.addLayers(layerlist);
                                     };
                                 };
 
@@ -940,7 +923,7 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
 
                  // Initialize the database as well as set offline data.
                  initDB: function(callback) {
-                    var editStore = offlineWidget.editStore;
+                    var editStore = this.editStore;
                         if(!editStore._isDBInit) {
                             var request = indexedDB.open(editStore.DB_NAME, 11);
                             request.onupgradeneeded = function() {
@@ -972,10 +955,10 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                 buildDatabase: function (layerholder, callback){
                         
                         // params should be an object of {json: layer}
-                        var editStore = offlineWidget.editStore;
+                        var editStore = this.editStore;
                         editStore._featureLayers = [];
-                       
-                        offlineWidget.initDB(function(e) {
+                        var that = this;
+                        that.initDB(function(e) {
                             var db;
                             var deferred = new Deferred();
                             var request = indexedDB.open(editStore.DB_NAME, 11);
@@ -983,7 +966,7 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                                     db = evt.target.result;
                                     
                                     var myDataStore = function (layer) {
-                                          var dataStore = offlineWidget.getFeatureLayerJSON(layer);
+                                          var dataStore = that.getFeatureLayerJSON(layer);
                                           dataStore.id = layer.name;
                                           var FEATURE_COLLECTION_ID = layer.name + '_collection';
                                           layer.offlineExtended = true; // to identify layer has been extended
@@ -1043,7 +1026,7 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
 
                 getFeatureLayerJSON: function (item) {
                         
-                    var map = offlineWidget.map;
+                    var map = this.map;
                     return {
                         "featureLayerCollection": JSON.stringify(item.toJson()),
                         "zoomLevel": map.getZoom(),
@@ -1053,15 +1036,14 @@ define(["dojo/_base/declare","dojo/_base/array","dojo/parser", "dojo/ready", "do
                 },
 
                 updateFeatureLayerJSON: function () {
-
-                        var testLayers =  offlineWidget.testLayers;
+                        var that = this;
+                        var testLayers =  this.testLayers;
                         arrayUtils.forEach(testLayers, function(item) {
-                             var fl = offlineWidget.getFeatureLayerJSON(item);
+                             var fl = that.getFeatureLayerJSON(item);
                             item.setFeatureLayerJSONDataStore(fl,function(result,error){
                             console.log("updateFeatureLayerJSON - Result: " + result + ", error: " + error);
                             });
                         });
-                       
                 }
         });
-});
+     });

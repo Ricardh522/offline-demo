@@ -57,21 +57,21 @@ gulp.task('copy', () =>
 );
 
 // Compile and automatically prefix stylesheets
+gulp.task('del', () => {
+  del.sync(['src/app/resources/css/all.css', 'src/app/resources/styles/build/*.css',
+           '!src/app/resources/styles/build'], function(paths) {
+    console.log('Deleted files/folders:\n', paths.join('\n'));
+  });
+});
+
 gulp.task('stylus', () => {
   gulp.src('src/app/resources/styles/*.styl')
     .pipe(stylus())
     .pipe(gulp.dest('src/app/resources/styles/build'));
 });
 
-gulp.task('del', () => {
-  del.sync(['src/app/resources/css/all.css', '!src/app/resources/css'], function(paths) {
-    console.log('Deleted files/folders:\n', paths.join('\n'));
-  });
-});
-
-
   gulp.task('prefix', () => {
-      gulp.src('src/app/resources/styles/build/*.css')
+      gulp.src('src/app/resources/styles/build/template-design.css')
           .pipe(sourcemaps.init())
           .pipe(autoprefixer())
           .pipe(concat('all.css'))
@@ -80,8 +80,12 @@ gulp.task('del', () => {
   });
 
 
-// Watch files for changes & reload
-gulp.task('serve', ['stylus', 'del', 'prefix'], () => {
+
+gulp.task('default', function (cb) {
+  runSequence(['del', 'stylus'], cb);
+});
+
+gulp.task('serve', ['prefix'], ()=> {
   browserSync({
     notify: false,
     // Customize the BrowserSync console logging prefix
@@ -95,8 +99,10 @@ gulp.task('serve', ['stylus', 'del', 'prefix'], () => {
 
   gulp.watch(['src/app/templates/*.html'], reload);
   gulp.watch(['src/index.html'], reload);
-  gulp.watch(['src/app/resources/**/**'], reload);
+  gulp.watch(['src/app/resources/styles/*.styl'], reload);
   gulp.watch(['src/app/*.js'], ['jshint', reload]);
+  gulp.watch(['src/app/templates/*.html'], ['jshint', reload]);
+  
   gulp.watch(['dist/index.html'], reload);
 });
 

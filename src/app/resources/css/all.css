@@ -1,32 +1,23 @@
-#splashPage {
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  bottom: 0px;
-  right: 0px;
-  background-color: #fff;
-  z-index: 100;
-  opacity: 1;
-  visibility: visible;
-  -webkit-transition-property: opacity, visibility;
-  transition-property: opacity, visibility;
-  -webkit-transition-delay: 3s;
-  transition-delay: 3s;
-  -webkit-transition-duration: 3s;
-  transition-duration: 3s;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
-  justify-content: center;
-  -webkit-align-content: center;
-  -ms-flex-line-pack: center;
-  align-content: center;
+.pageOverlay {
+  top: 50%;
+  left: 50%;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  z-index: 1001;
+  display: block;
 }
 
+#loadingOverlay {
+  background: #fff url("../images/loading-throb.gif") no-repeat 10px 23px;
+}
+
+.loadingMessage {
+  padding: 25px 40px;
+  color: #999;
+}
+
+html,
 body {
   position: absolute;
   overflow: hidden;
@@ -91,14 +82,7 @@ body {
 }
 
 .container-fluid {
-  opacity: 0;
-  visibility: hidden;
-  -webkit-transition-property: opacity, visibility;
-  transition-property: opacity, visibility;
-  -webkit-transition-delay: 0;
-  transition-delay: 0;
-  -webkit-transition-duration: 6s;
-  transition-duration: 6s;
+  opacity: 1;
   overflow: hidden;
   position: absolute;
   top: 0px;

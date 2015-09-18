@@ -96,7 +96,6 @@ a native app look this only happens after app is saved to the desktop-->
     <link href="app/resources/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <link rel="stylesheet" href= "dijit/themes/claro/claro.css">
     <link rel="stylesheet" href= "esri/css/esri.css">
-    <link rel="stylesheet" href= "esri/css/calcite/calcite.css">
 
     <link rel="stylesheet" href="app/resources/css/bootstrapmap.min.css">
     <link rel="stylesheet" href="app/resources/css/all.css">
@@ -125,12 +124,39 @@ a native app look this only happens after app is saved to the desktop-->
 
     
 
-  <script data-dojo-config="async: true, deps: ['app/run']" src="./dojo/dojo.js"></script>
+  <script data-dojo-config="async: true, parseOnLoad: false, deps: ['app/run']" src="./dojo/dojo.js"></script>
   
     <!-- Include a reference to IndexedDBShim for library to work on Safari 7.x -->
     <script src="./app/libs/IndexedDBShim.js"></script>
+
 </head>
 <body class="claro">
-    <div data-dojo-type="app/App" id="appDiv"></div>
+    <div id="loadingOverlay" class="loadingOverlay pageOverlay"></div>
+    <div id="appDiv"></div>
 </body>
+<script>
+ var demo;
+    require(["dojo/_base/declare","dojo/dom","dojo/dom-style", "dojo/_base/fx"],
+    function(declare, dom, domStyle, fx){
+        var Demo = declare(null, {
+            overlayNode:null,
+            constructor:function(){
+                // save a reference to the overlay
+                this.overlayNode = dom.byId("loadingOverlay");
+            },
+            // called to hide the loading overlay
+            endLoading:function(){
+                fx.fadeOut({
+                    node: this.overlayNode,
+                    onEnd: function(node){
+                        domStyle.set(node, 'display', 'none');
+                    }
+                }).play();
+            },
+
+            
+        });
+        demo = new Demo();
+    });
+    </script>
 </html>
