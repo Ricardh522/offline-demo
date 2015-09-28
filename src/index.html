@@ -37,75 +37,11 @@ a native app look this only happens after app is saved to the desktop-->
 <title>Mobile App Bootstrap with Offline-js</title>
 
 <head>
- <script>
-//     // DO NOT DELETE!
-//     // Listen for application cache update events
-//     // We want to place this as early in the application life-cycle as possible!
-    window.addEventListener('load', function(evt) {
-        
-        var appCache = window.applicationCache;
-
-        var status = function() {
-          switch (appCache.status) {
-            case appCache.UNCACHED: // UNCACHED == 0
-              return 'UNCACHED';
-              break;
-            case appCache.IDLE: // IDLE == 1
-              return 'IDLE';
-              break;
-            case appCache.CHECKING: // CHECKING == 2
-              return 'CHECKING';
-              break;
-            case appCache.DOWNLOADING: // DOWNLOADING == 3
-              return 'DOWNLOADING';
-              break;
-            case appCache.UPDATEREADY:  // UPDATEREADY == 4
-              return 'UPDATEREADY';
-              break;
-            case appCache.OBSOLETE: // OBSOLETE == 5
-              return 'OBSOLETE';
-              break;
-            case appCache.CACHE_LOADED:
-              return 'CACHE LOADED';
-            default:
-              return 'UKNOWN CACHE STATUS';
-              break;
-          };
-        };
-
-        appCache.addEventListener('updateready', function(evt) {
-            if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
-                // Browser downloaded a new app cache.
-                if (confirm('A new version of this cache is available.')) {
-                    window.location.reload();
-                    console.log("App cache reloaded");
-                    appCache.swapCache();
-                }
-            } else {
-                // Manifest didn't changed. Nothing new to server.
-                console.log("App cache no change");
-            }
-        }, false);
-
-    }, false);
-
-  </script>
-  
-
-    <!-- Bootstrap core CSS -->
-    <link href="app/resources/css/bootstrap.min.css" rel="stylesheet" media="screen">
-    <link rel="stylesheet" href= "dijit/themes/claro/claro.css">
-    <link rel="stylesheet" href= "esri/css/esri.css">
-
-    <link rel="stylesheet" href="app/resources/css/bootstrapmap.min.css">
-    <link rel="stylesheet" href="app/resources/css/all.css">
- 
-    <!--Include a reference to offline.js which detects online/offline conditions-->
-    <script src="app/libs/offline.min.js"></script>
-    <script src="app/libs/jquery-1.11.1.js"></script>
-    <script src="app/libs/bootstrap.min.js"></script>     
-
-
+    <script src='./windowEvent.js'></script>
+    <link rel="stylesheet" href="./app/resources/main.css">
+    <!-- Include a reference to IndexedDBShim for library to work on Safari 7.x -->
+    <script src="./app/libs/IndexedDBShim.js"></script>
+    <script src="./app/libs/offline.min.js"></script>
     <script>
         Offline.options = {
             checks: {
@@ -117,46 +53,13 @@ a native app look this only happens after app is saved to the desktop-->
                 active: 'image'
             }
         }
-
-
     </script>
-
-
-    
-
-  <script data-dojo-config="async: true, parseOnLoad: false, deps: ['app/run']" src="./dojo/dojo.js"></script>
-  
-    <!-- Include a reference to IndexedDBShim for library to work on Safari 7.x -->
-    <script src="./app/libs/IndexedDBShim.js"></script>
-
-</head>
-<body class="claro">
-    <div id="loadingOverlay" class="loadingOverlay pageOverlay"></div>
-    <div id="appDiv"></div>
+    </head>
+    <body class="claro">
+        <div id="loadingOverlay" class="loadingOverlay pageOverlay"></div>
+        <div  id="appDiv"></div>    
+  <script src="./app/libs/jquery-2.1.4.js"></script>
+  <script src="./dojoConfig.js"></script>
+  <script src="./dojo/dojo.js" async></script>
 </body>
-<script>
- var demo;
-    require(["dojo/_base/declare","dojo/dom","dojo/dom-style", "dojo/_base/fx"],
-    function(declare, dom, domStyle, fx){
-        var Demo = declare(null, {
-            overlayNode:null,
-            constructor:function(){
-                // save a reference to the overlay
-                this.overlayNode = dom.byId("loadingOverlay");
-            },
-            // called to hide the loading overlay
-            endLoading:function(){
-                fx.fadeOut({
-                    node: this.overlayNode,
-                    onEnd: function(node){
-                        domStyle.set(node, 'display', 'none');
-                    }
-                }).play();
-            },
-
-            
-        });
-        demo = new Demo();
-    });
-    </script>
 </html>

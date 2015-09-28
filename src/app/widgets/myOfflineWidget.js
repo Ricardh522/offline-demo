@@ -12,7 +12,7 @@ define(["dojo/_base/declare","dojo/_base/array", "dojo/dom-style",
    "esri/renderers/SimpleRenderer", "esri/symbols/TextSymbol", "esri/request",
      "dojo/dom-construct", "esri/symbols/SimpleFillSymbol",
      "esri/symbols/SimpleLineSymbol", "esri/Color",  "dijit/_WidgetBase",
-      "dijit/_TemplatedMixin", "dojo/text!./templates/OfflineWidget.html", "app/utils/offline-tiles-advanced-min.js"],
+      "dijit/_TemplatedMixin", "dojo/text! ./app/widgets/templates/myOfflineWidget.html", "app/widgets/libs/offline-tiles-advanced-src"],
   function (declare, arrayUtils, domStyle, dom, domClass, on, mouse, Deferred, domAttr, all,
  webMercatorUtils, Geoprocessor, lang, IdentifyTask,
   IdentifyParameters, IdentifyResult, FeatureSet, ArcGISDynamicMapServiceLayer,
@@ -21,7 +21,8 @@ define(["dojo/_base/declare","dojo/_base/array", "dojo/dom-style",
      esriRequest, domConstruct, SimpleFillSymbol, SimpleLineSymbol,
     Color, _WidgetBase, _TemplatedMixin, template) { 
 
-     return declare("OfflineWidget", [_WidgetBase, _TemplatedMixin], {   
+    "use strict";
+     return declare("myOfflineWidget", [_WidgetBase, _TemplatedMixin], {   
 
             templateString: template,
 

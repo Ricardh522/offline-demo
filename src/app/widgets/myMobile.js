@@ -1,21 +1,22 @@
 define(["dojo/_base/declare", "dijit/_WidgetBase", "esri/config", "esri/urlUtils", "esri/tasks/query", "dojo/on", "dojo/mouse",
  "esri/renderers/SimpleRenderer", "esri/dijit/BasemapGallery", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", 
- "esri/Color", "app/utils/debouncer.js","dojo/_base/array", "dojo/dom", "dojo/query", "dojox/gesture/swipe", "esri/dijit/Measurement",
+ "esri/Color", "app/widgets/libs/debouncer","dojo/_base/array", "dojo/dom", "dojo/query", "dojox/gesture/swipe", "esri/dijit/Measurement",
   "esri/dijit/LocateButton", "esri/layers/ArcGISDynamicMapServiceLayer", "dojo/ready", "dojo/parser", "dijit/TitlePane",
       "esri/layers/FeatureLayer", "esri/geometry/Point", "dojo/dom-style", "dojo/dom-attr", 
      "esri/graphic", "esri/layers/GraphicsLayer", "esri/symbols/PictureMarkerSymbol", "esri/dijit/HomeButton", "esri/dijit/util/busyIndicator",
      "esri/dijit/Scalebar", "esri/layers/GeoRSSLayer", "esri/geometry/Extent", "esri/SpatialReference", "esri/layers/ImageParameters",
      "esri/arcgis/OAuthInfo", "esri/IdentityManager", "esri/dijit/Legend", "esri/dijit/Popup", "esri/dijit/PopupTemplate", "dojo/dom-construct",
-      "esri/symbols/SimpleFillSymbol", "esri/dijit/LayerList", "app/utils/bootstrapmap.min.js", "app/utils/appCacheManager.js", "app/OfflineWidget",
-   "dijit/_TemplatedMixin", "dijit/_WidgetsInTemplateMixin", "dijit/_AttachMixin","dojo/text!./templates/App.html",  "app/utils/offline-tiles-advanced-min.js"],
+      "esri/symbols/SimpleFillSymbol", "esri/dijit/LayerList", "app/widgets/libs/bootstrapmap", "app/widgets/myOfflineWidget",
+   "dijit/_TemplatedMixin", "dijit/_WidgetsInTemplateMixin", "dijit/_AttachMixin","dojo/text! ./app/widgets/templates/myMobile.html"],
 
     function (declare, _WidgetBase, esriConfig, urlUtils, Query, on, mouse, SimpleRenderer, BasemapGallery, SimpleMarkerSymbol, SimpleLineSymbol, Color,
         debouncer, arrayUtils, dom, query, swipe, Measurement, LocateButton, ArcGISDynamicMapServiceLayer, ready, parser, TitlePane, FeatureLayer, Point, domStyle, domAttr, 
         Graphic, GraphicsLayer, PictureMarkerSymbol, HomeButton, busyIndicator, Scalebar,
         GeoRSSLayer, Extent, SpatialReference, ImageParameters, OAuthInfo, esriId, Legend, Popup,  PopupTemplate, domConstruct, SimpleFillSymbol, LayerList,
-         BootstrapMap, AppCacheManager, OfflineWidget, _TemplatedMixin, _WidgetsInTemplateMixin,  _AttachMixin, template) {
+         BootstrapMap, myOfflineWidget, _TemplatedMixin, _WidgetsInTemplateMixin,  _AttachMixin, template) {
 
-        return declare("App", [ _WidgetBase, _TemplatedMixin,  _WidgetsInTemplateMixin, _AttachMixin, OfflineWidget], {
+        "use strict";
+        return declare("myMobile", [ _WidgetBase, _TemplatedMixin,  _WidgetsInTemplateMixin, _AttachMixin, myOfflineWidget], {
             
             templateString: template,
             widgetsInTemplate: true,
@@ -26,37 +27,12 @@ define(["dojo/_base/declare", "dijit/_WidgetBase", "esri/config", "esri/urlUtils
 
             loadhandle: null,
             startup: function() {
-
-              var appCacheManager;
-              initAppCacheManager();
               
-              function initAppCacheManager(){
-                  appCacheManager = new AppCacheManager(true,true);
-                  appCacheManager.setUpdateCache();
-                  appCacheManager.setCacheListeners();
-                  appCacheManager.getCacheStatus();
-                  appCacheManager.on(appCacheManager.CACHE_EVENT,cacheEventHandler);
-                  appCacheManager.on(appCacheManager.CACHE_ERROR,cacheErrorHandler);
-                  appCacheManager.on(appCacheManager.CACHE_LOADED,cacheLoaderHandler);
-              }
+              var httpmachine = "http://127.0.0.1";
+              var sslmachine = "https://127.0.0.1";
 
-              function cacheLoaderHandler(evt){
-                  if(evt == appCacheManager.CACHE_LOADED) alert("Application cache successfully loaded!");
-              }
-
-              function cacheEventHandler(evt){
-                  console.log("CACHE EVENT: " + JSON.stringify(evt));
-              }
-
-              function cacheErrorHandler(evt){
-                  console.log("CACHE ERROR: " + JSON.stringify(evt));
-              }
-
-              // var httpmachine = "http://127.0.0.1"
-              // var sslmachine = "https://127.0.0.1"
-
-              var httpmachine = "http://52.0.185.237";
-              var sslmachine = "https://52.0.185.237";
+              // var httpmachine = "http://52.0.185.237";
+              // var sslmachine = "https://52.0.185.237";
               // var httpmachine = "http://52.0.46.248:6080"
               // var sslmachine = "https://52.0.46.248:6443"
 
@@ -68,7 +44,7 @@ define(["dojo/_base/declare", "dijit/_WidgetBase", "esri/config", "esri/urlUtils
               var mapName = "RSW/Utilities";
 
               var mapService = new ArcGISDynamicMapServiceLayer(serverUrl + '/' + mapName + '/MapServer');
-              var tileServiceUrl = "http://52.0.185.237/waadmin/rest/services/RSW/WGS84Airfield/MapServer";
+              var tileServiceUrl = "http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer";
               var storedExtent = localStorage.offlineExtent;
               var mapExtent;
               var centerPnt;
@@ -195,10 +171,10 @@ define(["dojo/_base/declare", "dijit/_WidgetBase", "esri/config", "esri/urlUtils
                 dom.byId("measurePane").appendChild(tp.domNode);
                 tp.startup();
 
-                 loadhandle = busyIndicator.create({
+                 var loadhandle = busyIndicator.create({
                       backgroundOpacity: 0.01,
                       target: mapDiv,
-                      imageUrl: "app/resources/images/loading-throb.gif",
+                      imageUrl: "app/widgets/templates/images/loading-throb.gif",
                       zIndex: 100
                   });
               
@@ -223,7 +199,7 @@ define(["dojo/_base/declare", "dijit/_WidgetBase", "esri/config", "esri/urlUtils
                 }, "layerList");
                 toc.startup();
 
-              var offlineWidget = new OfflineWidget({
+              var offlineWidget = new myOfflineWidget({
                   map: map,
                   onlineTest: serverUrl,
                   mapService: mapService,
