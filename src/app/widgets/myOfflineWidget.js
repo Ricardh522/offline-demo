@@ -12,7 +12,7 @@ define(["dojo/_base/declare","dojo/_base/array", "dojo/dom-style",
    "esri/renderers/SimpleRenderer", "esri/symbols/TextSymbol", "esri/request",
      "dojo/dom-construct", "esri/symbols/SimpleFillSymbol",
      "esri/symbols/SimpleLineSymbol", "esri/Color",  "dijit/_WidgetBase",
-      "dijit/_TemplatedMixin", "dojo/text! ./app/widgets/templates/myOfflineWidget.html", "app/widgets/libs/offline-tiles-advanced-src"],
+      "dijit/_TemplatedMixin", "dojo/text! ./app/widgets/templates/myOfflineWidget.html", "app/widgets/libs/offline-tiles-advanced-src.js"],
   function (declare, arrayUtils, domStyle, dom, domClass, on, mouse, Deferred, domAttr, all,
  webMercatorUtils, Geoprocessor, lang, IdentifyTask,
   IdentifyParameters, IdentifyResult, FeatureSet, ArcGISDynamicMapServiceLayer,
@@ -32,13 +32,14 @@ define(["dojo/_base/declare","dojo/_base/array", "dojo/dom-style",
             },
             indexes: [],
             editStore: {
-                DB_NAME:"features_store",  
-                DB_STORE_NAME:  "features",
+                DB_NAME:"features",  
+                DB_STORE_NAME:  "features_store",
                 DB_UID:  "objectid"
             },
             
             initialize: function(callback) {
                  var map = this.map;
+                 var _isOnline;
                  var tileUrl = this.tileServiceUrl;
                 
                  console.log("OfflineWidget Initializing Function fired");
@@ -66,53 +67,56 @@ define(["dojo/_base/declare","dojo/_base/array", "dojo/dom-style",
                 // For cancelling the download of tiles
                 this._wantToCancel = false;
                 this._downloadState =  "downloaded";
-            
+                this._isOnline = _isOnline;
                 callback({
                     tiledMapService: this.tileLayer,
                 });
             },
 
             validate: function(callback) {
-                var that = this;
-                (function() {
+  
+                var nested = function() {
                     var downloadTiles = dom.byId('downloadTiles');
                     var downloadFeatures = dom.byId('downloadFeatures');
                     var clearButton = dom.byId('clearButton');
                     var buttons = [downloadTiles, downloadFeatures, clearButton];
-
-                    that.validateOnline(function(result) {
+                    var that = this;
+                    this.validateOnline(function(result) {
                      
                         if(result !== 'failed') {
-                            _isOnline = true;
-                            _isOffline = false;
+                            that._isOnline = true;
+                            that._isOffline = false;
                             //setUIOnline();
                            arrayUtils.forEach(buttons, function(e) {
                                     if (domClass.contains(e, "disabled") === true) {
                                         domClass.remove(e, "disabled");
                                     }
                                 });
-                            callback(_isOnline);
+                            callback(that._isOnline);
                            
                         }
                         else {
-                            _isOnline = false;
-                            _isOffline = true;
+                           that. _isOnline = false;
+                           that. _isOffline = true;
                             arrayUtils.forEach(buttons, function(e) {
                                     if (domClass.contains(e, "disabled") === false) {
                                         domClass.add(e, "disabled");
                                     }
                                 });
-                            callback(_isOnline);
+                            callback(that._isOnline);
                         }
                         
                     });
-                })();
+                };
+
+                nested.call(this);
                     
                 },
 
             startup: function() {
               
                var that = this;
+               var zoom = this.map.zoom;
                var editStore = this.editStore;
                var DB_NAME = editStore.DB_NAME;
                var DB_STORE_NAME = editStore.DB_STORE_NAME;
@@ -131,7 +135,7 @@ define(["dojo/_base/declare","dojo/_base/array", "dojo/dom-style",
                 }
 
                 (function () {
-                        request = indexedDB.open(DB_NAME, 11);
+                        var request = indexedDB.open(DB_NAME, 11);
                         request.onupgradeneeded = function(event) {
                             var db = event.target.result;
                             var store = db.createObjectStore(DB_STORE_NAME, {keyPath: 'id'});
@@ -141,7 +145,7 @@ define(["dojo/_base/declare","dojo/_base/array", "dojo/dom-style",
                         };
 
                         request.onsuccess = function(event) {
-                          db = event.target.result;
+                          var db = event.target.result;
                           editStore._isDBInit = true;
                           db.close();
                         };
@@ -182,7 +186,7 @@ define(["dojo/_base/declare","dojo/_base/array", "dojo/dom-style",
                     $(this).css('-webkit-transform', 'scale(1, 1)');
                     var db;
                     var openDb = function (params, callback) {
-                        request = indexedDB.open(DB_NAME, 11);
+                        var request = indexedDB.open(DB_NAME, 11);
                         request.onupgradeneeded = function(event) {
                             var db = event.target.result;
                             var store = db.createObjectStore(DB_STORE_NAME, {keyPath: 'id'});
@@ -604,7 +608,7 @@ define(["dojo/_base/declare","dojo/_base/array", "dojo/dom-style",
                         if(this.downloadState == 'downloading')
                         {
                             console.log("cancel!");
-                            _wantToCancel = true;
+                            this._wantToCancel = true;
         
 
                          
@@ -614,7 +618,7 @@ define(["dojo/_base/declare","dojo/_base/array", "dojo/dom-style",
                             var zoom = tileLayer.getMinMaxLOD(minZoomAdjust,maxZoomAdjust);
 
                             var extent = tileLayer.getExtentBuffer(EXTENT_BUFFER,map.extent);
-                            _wantToCancel = false;
+                            this._wantToCancel = false;
                              var message = "<span id='message' style='z-index: 100; position: absolute; top: 0px; right: 5px; font: black; arial; text-shadow: 1px 1px 3px white'>downloading tiles...</span>";
                             $('#navbar' ).append(message);
                             tileLayer.prepareForOffline(zoom.min, zoom.max, extent, this.reportProgress.bind(this));
@@ -659,7 +663,7 @@ define(["dojo/_base/declare","dojo/_base/array", "dojo/dom-style",
 
             
                 }
-                return _wantToCancel; //determines if a cancel request has been issued
+                return this._wantToCancel; //determines if a cancel request has been issued
             },
 
 
@@ -672,6 +676,7 @@ define(["dojo/_base/declare","dojo/_base/array", "dojo/dom-style",
                 var totalIds = mapIds.concat(graphicIds);
                 var that = this;
                 if (totalIds.length > 1) {
+                    var i;
                     for (i=1; i < totalIds.length; i++) {
                         var layer = map.getLayer(totalIds[i]);
                         map.removeLayer(layer);
@@ -731,7 +736,7 @@ define(["dojo/_base/declare","dojo/_base/array", "dojo/dom-style",
                         var tileNode = dom.byId("downloadTiles");
                         var featureNode = dom.byId("downloadFeatures");
 
-                        if(_isOnline === true){
+                        if(that._isOnline === true){
                              var test = 1;
                              if (test === 0) {
                                 that.clearMap(null, function(e) {
@@ -766,31 +771,31 @@ define(["dojo/_base/declare","dojo/_base/array", "dojo/dom-style",
                  */
 
                 initPanZoomListeners: function () {
+                   var that = this;
+                   var map = this.map;
                    this.validate(function(e) {
-                        console.log(_isOnline + " :ArcServer machine accessible");
+                        console.log(that._isOnline + " :ArcServer machine accessible");
                     });
 
-                    var map = this.map;
-                    var that = this;
-                  
+                    
                     map.on("zoom-end",function(evt) {
-                        _currentExtent = evt.extent;
+                        that. _currentExtent = evt.extent;
                         that.updateLocalStorage();
                         Offline.check();
                     });
 
                     map.on("pan-end",function(evt) {
-                        _currentExtent = evt.extent;
+                        that._currentExtent = evt.extent;
                         that.updateLocalStorage();
                         Offline.check();
                     });
 
                       if (Offline.state === 'up') {
-                          _isOnline = true;
-                          _isOffline = false;
+                          that._isOnline = true;
+                          that._isOffline = false;
                       } else {
-                          _isOnline = false;
-                          _isOffline = true;
+                         that._isOnline = false;
+                          that._isOffline = true;
                       }
                 },
                 
@@ -884,12 +889,13 @@ define(["dojo/_base/declare","dojo/_base/array", "dojo/dom-style",
 
                                     tx.oncomplete = function(evt) {
                                       console.log("transaction completed collecting layers from store");
-                                      promises = [];
+                                      var promises = [];
                                         var polys = layerholder.polys;
                                         var points = layerholder.points;
                                         var lines = layerholder.lines;
                                         var layerlist = polys.concat(lines, points);
                                         var tocLayers = [];
+                                        var i;
                                         for (i=0; i<layerlist.length; i+=1) {
                                             tocLayers.push({
                                                 layer: layerlist[i]

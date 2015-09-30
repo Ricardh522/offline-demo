@@ -28,11 +28,11 @@ define(["dojo/_base/declare", "dijit/_WidgetBase", "esri/config", "esri/urlUtils
             loadhandle: null,
             startup: function() {
               
-              var httpmachine = "http://127.0.0.1";
-              var sslmachine = "https://127.0.0.1";
+              // var httpmachine = "http://127.0.0.1";
+              // var sslmachine = "https://127.0.0.1";
 
-              // var httpmachine = "http://52.0.185.237";
-              // var sslmachine = "https://52.0.185.237";
+              var httpmachine = "http://52.0.185.237";
+              var sslmachine = "https://52.0.185.237";
               // var httpmachine = "http://52.0.46.248:6080"
               // var sslmachine = "https://52.0.46.248:6443"
 
@@ -64,7 +64,7 @@ define(["dojo/_base/declare", "dijit/_WidgetBase", "esri/config", "esri/urlUtils
                    centerPnt = mapExtent.getCenter();
                 }
                 
-              var zoom;
+             var zoom = null;
               var storedZoom = localStorage.offlineZoom;
               if (storedZoom  !== undefined) {
                 zoom = storedZoom;
@@ -283,7 +283,8 @@ define(["dojo/_base/declare", "dijit/_WidgetBase", "esri/config", "esri/urlUtils
                     });
 
                     debouncer.setOrientationListener(250,function(){
-                        console.log("orientation"); orientationChange = true;
+                        console.log("orientation"); 
+                        debouncer.orientationChange = true;
                     });
 
 
